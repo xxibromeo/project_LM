@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model LMTimesheetRecords {
+  id                   Int      @id @unique @default(autoincrement())
+  date                 DateTime
+  siteCode             String
+  siteName             String
+  numberOfPeople       Int
+  workingPeople        Int
+  businessLeave        Int
+  sickLeave            Int
+  peopleLeave          Int
+  overContractEmployee Int
+  replacementEmployee  Int
+  remark               String
+  nameadmin            String
+  replacementNames     String[]
+  createdAt            DateTime @default(now())
+  updateAt             DateTime @updatedAt
+
+  // สร้างความสัมพันธ์กับ Site
+  site Site @relation(fields: [siteCode], references: [siteCode])
+}
+
+model Site {
+  id             Int    @id @unique @default(autoincrement())
+  siteCode       String @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
+  siteName       String
+  numberOfPeople Int
+
+  LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
+}

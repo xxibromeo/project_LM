@@ -1,55 +1,142 @@
-'use client';
+"use client";
 
-import { Card, Select, DatePicker, InputNumber, Button, Form } from 'antd';
-import type { DatePickerProps } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import dayjs from 'dayjs';
+import {
+  Card,
+  Select,
+  DatePicker,
+  InputNumber,
+  Button,
+  Form,
+  Input,
+} from "antd";
+import type { DatePickerProps } from "antd";
+import TextArea from "antd/es/input/TextArea";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import dayjs, { Dayjs } from "dayjs";
+import { createTimeSheet, getAllSiteData, ISite } from "./action";
+import { useEffect, useState } from "react";
 
 const { Option } = Select;
 
+
+type TFormValue = {
+  site: string;
+  date: Date;
+  siteCode: string;
+  numberOfPeople: number;
+  workingPeople: number;
+  businessLeave: number;
+  sickLeave: number;
+  peopleLeave: number;
+  overContractEmployee: number;
+  replacementEmployee: number;
+  replacementNames: string[];
+  remark: string;
+  nameadmit: string;
+};
+
 export default function RegisterForm() {
   const [form] = Form.useForm();
+  const [replacementCount, setReplacementCount] = useState(0);
+  const [siteData, setSiteData] = useState<ISite[]>([])
 
-  // ตัวอย่างข้อมูล site
-  const sites = ['65LM-L-0011','65LM-L-0012','66LM-L-0004','68LM-L-0006'];
+  useEffect(() => {
+    getSiteData()
+  }, [])
+
+  const getSiteData = async () => {
+    const site = await getAllSiteData()
+    setSiteData(site)
+  }
+  // ย้าย onSitechange มาประกาศภายใน component
+  const onSitechange = (value: string) => {
+    const selectedSite = siteData.find((site) => site.siteCode === value);
+    form.setFieldsValue({ numberOfPeople: selectedSite?.numberOfPeople });
+    form.setFieldsValue({ workingPeople: selectedSite?.numberOfPeople });
+  };
+
+  // ฟังก์ชันสำหรับคำนวณใหม่ทุกครั้งที่มีการเปลี่ยนแปลง
+  const recalculateWorkingPeople = () => {
+    const numberOfPeople = form.getFieldValue("numberOfPeople") || 0; //*อันนี้หมายถึงถ้าซ้ายมีค่าที่เป็นอย่างอื่นนอกจากตัวเลขให้คิดเป็น 0
+    const businessLeave = form.getFieldValue("businessLeave") || 0;
+    const sickLeave = form.getFieldValue("sickLeave") || 0;
+    const peopleLeave = form.getFieldValue("peopleLeave") || 0;
+
+    // คำนวณยอดพนักงานที่เหลือ
+    const workingPeople =
+      numberOfPeople - (businessLeave + sickLeave + peopleLeave);
+    form.setFieldsValue({ workingPeople });
+    console.log(businessLeave, sickLeave);
+  };
 
   // กำหนดวันที่เป็นวันนี้ และไม่ให้แก้ไข
-  const dateFormat = 'DD-MM-YYYY';
+  const dateFormat = "DD-MM-YYYY";
   const today = dayjs();
 
+  // ฟังก์ชันสำหรับเปลี่ยนแปลงจำนวนคนแทนงาน
+  const onReplacementCountChange = (value: number | null) => {
+    setReplacementCount(value || 0);
+    // ถ้าจำนวนคนลดลง เคลียร์ค่าที่เกินออกจากฟอร์ม (ใน field replacementNames)
+    const currentNames = form.getFieldValue("replacementNames") || [];
+    if ((currentNames.length || 0) > (value ?? 0)) {
+      form.setFieldsValue({
+        replacementNames: currentNames.slice(0, value ?? 0),
+      });
+    }
+  };
+
   // ฟังก์ชันเรียกใช้เมื่อกด Submit
-  const onFinish = (values: unknown) => {
-    console.log('Form Values:', values);
-    alert(JSON.stringify(values, null, 2));
+  const onFinish = async (values: TFormValue) => {
+    console.log("Form Values:", values);
+    const save = await createTimeSheet({
+      date: values.date.toISOString(),
+      siteCode: values.siteCode,
+      numberOfPeople: values.numberOfPeople,
+      workingPeople: values.workingPeople,
+      businessLeave: values.businessLeave,
+      sickLeave: values.sickLeave,
+      peopleLeave: values.peopleLeave,
+      overContractEmployee: values.overContractEmployee,
+      replacementEmployee: values.replacementEmployee,
+      remark: values.remark,
+      siteName:
+        siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
+      nameadmin: "",
+      replacementNames: [],
+    });
+    if (save) {
+      form.resetFields();
+      alert("ลงทะเบียนสำเร็จ");
+    }
   };
 
   // ปิดการแก้ไข DatePicker (disabled)
-  const disabledDatePicker: DatePickerProps['disabledDate'] = () => true;
+  const disabledDatePicker: DatePickerProps["disabledDate"] = () => true;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-sm p-4">
+      <Card className="w-full max-w-lg p-4">
         <h1 className="text-lg font-semibold mb-4 text-center">ลงทะเบียน</h1>
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
-            site: sites[0],       // เริ่มต้นเป็น site แรก
-            date: today,          // วันที่วันนี้
-            people: 0,            // ค่าจำนวนเริ่มต้น
+            site: siteData, // เริ่มต้นเป็น site แรก
+            date: today, // วันที่วันนี้
+            remark: "",
           }}
         >
           {/* Select Site */}
           <Form.Item
-            name="site"
+            name="siteCode"
             label="กรุณาเลือก Site"
-            rules={[{ required: true, message: 'กรุณาเลือก Site' }]} //กฏที่เราต้องการให้ทำ
+            rules={[{ required: true, message: "กรุณาเลือก Site" }]} //กฏที่เราต้องการให้ทำ
           >
-            <Select placeholder="เลือก Site">
-              {sites.map((site) => (
-                <Option key={site} value={site}>
-                  {site}
+            <Select placeholder="เลือก Site" onChange={onSitechange}>
+              {siteData.map((site) => (
+                <Option key={site.siteCode} value={site.siteCode}>
+                  {site.siteName}
                 </Option>
               ))}
             </Select>
@@ -59,11 +146,11 @@ export default function RegisterForm() {
           <Form.Item
             name="date"
             label="วันที่"
-            rules={[{ required: true, message: 'กรุณาเลือกวันที่' }]}
+            rules={[{ required: true, message: "กรุณาเลือกวันที่" }]}
           >
             <DatePicker
-              size={'large'}
-              color='red'
+              size={"large"}
+              color="red"
               format={dateFormat}
               disabled
               disabledDate={disabledDatePicker}
@@ -71,95 +158,96 @@ export default function RegisterForm() {
           </Form.Item>
 
           {/* Number of People */}
-          <Form.Item
-            name="numberOfPeople"
-            label="พนักงานประจำ (จากฐานข้อมูล)"
-            
-          >
-            <InputNumber disabled size="large" min={1} max={100000} defaultValue={3}
+          <Form.Item name="numberOfPeople" label="พนักงานประจำ (จากฐานข้อมูล)">
+            <Input
+              type="number"
+              disabled
+              size="large"
+              min={1}
               className="w-full"
               placeholder="กรอกจำนวนคน"
             />
           </Form.Item>
 
-          <Form.Item
-            name="workingPeople"
-            label="พนักงานประจำที่เหลือ"
-            
-          >
-            <InputNumber disabled size="large" min={1} max={100000} defaultValue={5}
+          <Form.Item name="workingPeople" label="พนักงานประจำที่เหลือ">
+            <InputNumber
+              disabled
+              size="large"
+              min={1}
               className="w-full"
+              onChange={() => recalculateWorkingPeople()} //ถามข้อแตกต่างระหว่าง onchangeเฉยๆ
             />
           </Form.Item>
 
-            {/*ลากิจ*/}
-          <Form.Item
-            name="businessLeave"
-            label="ลากิจ"
-          >
-            <InputNumber 
-              size="large" min={0} max={100000} defaultValue={0} 
+          {/*ลากิจ*/}
+          <Form.Item name="businessLeave" label="ลากิจ">
+            <InputNumber
+              size="large"
+              min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
+              onChange={() => recalculateWorkingPeople()}
             />
           </Form.Item>
 
           {/*ลาป่วย*/}
-          <Form.Item
-            name="sickLeave"
-            label="ลาป่วย"
-          >
-            <InputNumber 
-              size="large" min={0} max={100000} defaultValue={0} 
+          <Form.Item name="sickLeave" label="ลาป่วย">
+            <InputNumber
+              size="large"
+              min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
+              onChange={() => recalculateWorkingPeople()}
             />
           </Form.Item>
 
-           {/*ขาดงาน*/}
-           <Form.Item
-            name="peoleaveple"
-            label="ขาดงาน"
-          >
-            <InputNumber 
-              size="large" min={0} max={100000} defaultValue={0} 
+          {/*ขาดงาน*/}
+          <Form.Item name="peopleLeave" label="ขาดงาน">
+            <InputNumber
+              size="large"
+              min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
+              onChange={() => recalculateWorkingPeople()}
             />
           </Form.Item>
 
           {/*พนักงานเกินสัญญา*/}
-          <Form.Item
-            name="overContractEmployee"
-            label="พนักงานเกินสัญญา"
-          >
-            <InputNumber 
-              size="large" min={0} max={100000} defaultValue={0} 
-              placeholder="กรอกจำนวนคน"
-            />
+          <Form.Item name="overContractEmployee" label="พนักงานเกินสัญญา">
+            <InputNumber size="large" min={0} placeholder="กรอกจำนวนคน" />
           </Form.Item>
 
-            {/*แทนงาน*/}
-           <Form.Item
-            name="replacementEmployee"
-            label="แทนงาน"
-          >
-            <InputNumber 
-              size="large" min={0} max={100000} defaultValue={0} 
+          {/*แทนงาน*/}
+          <Form.Item name="replacementEmployee" label="แทนงาน">
+            <InputNumber
+              size="large"
+              min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
+              onChange={onReplacementCountChange}
             />
           </Form.Item>
+          {/* แสดง input field สำหรับกรอกชื่อคนแทนงาน ตามจำนวนที่เลือก */}
+          {replacementCount > 0 &&
+            Array.from({ length: replacementCount }, (_, index) => (
+              <Form.Item
+                key={index}
+                name={["replacementNames", index]}
+                label={`ชื่อคนแทนงาน ${index + 1}`}
+                rules={[{ required: true, message: "กรุณากรอกชื่อคนแทนงาน" }]}
+              >
+                <Input
+                  placeholder={`กรอกชื่อคนแทนงาน ${index + 1}`}
+                  size="large"
+                  className="w-full"
+                />
+              </Form.Item>
+            ))}
 
-            {/*หมายเหตุ*/}
-           <Form.Item
-            name="remark"
-            label="หมายเหตุ"
-          >
-            
-          <TextArea rows={4} placeholder="maxLength is 6" maxLength={6} />
+          {/*หมายเหตุ*/}
+          <Form.Item name="remark" label="หมายเหตุ">
+            <TextArea rows={4} placeholder="หมายเหตุ" maxLength={6} />
           </Form.Item>
-
 
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
