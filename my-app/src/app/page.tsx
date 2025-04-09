@@ -74,7 +74,7 @@ export default function RegisterForm() {
   const today = dayjs();
 
   // ฟังก์ชันสำหรับเปลี่ยนแปลงจำนวนคนแทนงาน
-  const onReplacementCountChange = (value: number | null) => {
+  const onReplacementCountChange = (value: number | null ) => {
     setReplacementCount(value || 0);
     // ถ้าจำนวนคนลดลง เคลียร์ค่าที่เกินออกจากฟอร์ม (ใน field replacementNames)
     const currentNames = form.getFieldValue("replacementNames") || [];
@@ -102,7 +102,7 @@ export default function RegisterForm() {
       siteName:
         siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
       nameadmin: "",
-      replacementNames: [],
+      replacementNames:values.replacementNames,
     });
     if (save) {
       form.resetFields();
@@ -164,13 +164,14 @@ export default function RegisterForm() {
               disabled
               size="large"
               min={1}
-              className="w-full"
+              className="w-1/2"
               placeholder="กรอกจำนวนคน"
             />
           </Form.Item>
 
           <Form.Item name="workingPeople" label="พนักงานประจำที่เหลือ">
-            <InputNumber
+            <Input
+              type="number"
               disabled
               size="large"
               min={1}
@@ -181,7 +182,8 @@ export default function RegisterForm() {
 
           {/*ลากิจ*/}
           <Form.Item name="businessLeave" label="ลากิจ">
-            <InputNumber
+            <Input
+              type="number"
               size="large"
               min={0}
               className="w-full"
@@ -192,7 +194,8 @@ export default function RegisterForm() {
 
           {/*ลาป่วย*/}
           <Form.Item name="sickLeave" label="ลาป่วย">
-            <InputNumber
+            <Input
+              type="number"
               size="large"
               min={0}
               className="w-full"
@@ -203,7 +206,8 @@ export default function RegisterForm() {
 
           {/*ขาดงาน*/}
           <Form.Item name="peopleLeave" label="ขาดงาน">
-            <InputNumber
+            <Input
+              type="number"
               size="large"
               min={0}
               className="w-full"
@@ -219,12 +223,19 @@ export default function RegisterForm() {
 
           {/*แทนงาน*/}
           <Form.Item name="replacementEmployee" label="แทนงาน">
-            <InputNumber
+            <Input
+              type="number"
               size="large"
               min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
-              onChange={onReplacementCountChange}
+              onChange={(e) => {
+                // e: React.ChangeEvent<HTMLInputElement>
+                // e.target.value เป็น string เสมอ
+                const rawValue = e.target.value; // string
+                const asNumber = rawValue === "" ? null : Number(rawValue);
+                onReplacementCountChange(asNumber);
+              }}
             />
           </Form.Item>
           {/* แสดง input field สำหรับกรอกชื่อคนแทนงาน ตามจำนวนที่เลือก */}

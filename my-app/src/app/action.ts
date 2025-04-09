@@ -4,7 +4,7 @@ import { PrismaClient, Site } from "@prisma/client";
 const prisma = new PrismaClient();
 
 type TFormValue = {
-  nameadmin: string; // แก้ไขให้เป็น string
+  nameadmin: string; 
   date: string;
   siteName: string;
   siteCode: string;
@@ -17,6 +17,7 @@ type TFormValue = {
   replacementEmployee: number;
   remark: string;
   replacementNames: string[];
+
 };
 export type ISite = Site;
 
@@ -45,7 +46,7 @@ export const createTimeSheet = async (data: TFormValue) => {
         replacementEmployee: data.replacementEmployee || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
         remark: data.remark || "", // ตั้งค่า default เป็น "" ถ้าค่าหาย
         nameadmin: data.nameadmin ?? "ไม่พบชื่อ", // เพิ่มมา
-        replacementNames: data.replacementNames || [], // ตั้งค่า default เป็น [] ถ้าค่าหาย
+        replacementNames:data.replacementNames,
         siteName: data.siteName || "", // ตั้งค่า default เป็น "" ถ้าค่าหาย
       },
     });

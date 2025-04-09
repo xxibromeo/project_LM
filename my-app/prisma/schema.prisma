@@ -27,7 +27,7 @@ model LMTimesheetRecords {
   replacementEmployee  Int
   remark               String
   nameadmin            String
-  replacementNames     String[]
+  replacementNames     String
   createdAt            DateTime @default(now())
   updateAt             DateTime @updatedAt
 
@@ -42,4 +42,10 @@ model Site {
   numberOfPeople Int
 
   LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
+}
+
+model admin{
+  id  Int @id @unique @default(autoincrement())
+  ID_employee Int
+  name String
 }
