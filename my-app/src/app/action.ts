@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 type TFormValue = {
   nameadmin: string; 
   date: string;
+  
   siteName: string;
   siteCode: string;
   businessLeave: number;

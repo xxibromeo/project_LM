@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { LMTimesheetRecords } from "@prisma/client";
 
-export type ILMTimesheetRecords = LMTimesheetRecords
+export type ILMTimesheetRecords = LMTimesheetRecords;
 // ดึงข้อมูลทั้งหมด
 export async function getAllTimesheets() {
   return await prisma.lMTimesheetRecords.findMany({
@@ -14,6 +14,7 @@ export async function getAllTimesheets() {
 export async function updateTimesheet(
   id: number,
   data: {
+    subSite: string;
     siteCode: string;
     siteName: string;
     numberOfPeople: number;

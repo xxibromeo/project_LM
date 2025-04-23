@@ -13,6 +13,7 @@ const { Option } = Select;
 type TFormValue = {
   site: string;
   date: Date;
+  subSite:number;
   siteCode: string;
   numberOfPeople: number;
   workingPeople: number;
@@ -81,6 +82,7 @@ export default function RegisterForm() {
     console.log("Form Values:", values);
     const save = await createTimeSheet({
       date: values.date.toISOString(),
+      subSite:values.subSite,
       siteCode: values.siteCode,
       numberOfPeople: values.numberOfPeople,
       workingPeople: values.workingPeople,

@@ -16,6 +16,7 @@ datasource db {
 model LMTimesheetRecords {
   id                   Int      @id @unique @default(autoincrement())
   date                 DateTime
+  subSite              String
   siteCode             String
   siteName             String
   numberOfPeople       Int
