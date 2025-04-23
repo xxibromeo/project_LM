@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Card,
-  Select,
-  DatePicker,
-  InputNumber,
-  Button,
-  Form,
-  Input,
-} from "antd";
+import { Card, Select, DatePicker, Button, Form, Input } from "antd";
 import type { DatePickerProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,7 +9,6 @@ import { createTimeSheet, getAllSiteData, ISite } from "./action";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
-
 
 type TFormValue = {
   site: string;
@@ -38,16 +29,16 @@ type TFormValue = {
 export default function RegisterForm() {
   const [form] = Form.useForm();
   const [replacementCount, setReplacementCount] = useState(0);
-  const [siteData, setSiteData] = useState<ISite[]>([])
+  const [siteData, setSiteData] = useState<ISite[]>([]);
 
   useEffect(() => {
-    getSiteData()
-  }, [])
+    getSiteData();
+  }, []);
 
   const getSiteData = async () => {
-    const site = await getAllSiteData()
-    setSiteData(site)
-  }
+    const site = await getAllSiteData();
+    setSiteData(site);
+  };
   // ย้าย onSitechange มาประกาศภายใน component
   const onSitechange = (value: string) => {
     const selectedSite = siteData.find((site) => site.siteCode === value);
@@ -74,7 +65,7 @@ export default function RegisterForm() {
   const today = dayjs();
 
   // ฟังก์ชันสำหรับเปลี่ยนแปลงจำนวนคนแทนงาน
-  const onReplacementCountChange = (value: number | null ) => {
+  const onReplacementCountChange = (value: number | null) => {
     setReplacementCount(value || 0);
     // ถ้าจำนวนคนลดลง เคลียร์ค่าที่เกินออกจากฟอร์ม (ใน field replacementNames)
     const currentNames = form.getFieldValue("replacementNames") || [];
@@ -102,7 +93,7 @@ export default function RegisterForm() {
       siteName:
         siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
       nameadmin: "",
-      replacementNames:values.replacementNames,
+      replacementNames: values.replacementNames,
     });
     if (save) {
       form.resetFields();
@@ -115,7 +106,7 @@ export default function RegisterForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-lg p-4">
+      <Card className="w-full max-w-lg p-10">
         <h1 className="text-lg font-semibold mb-4 text-center">ลงทะเบียน</h1>
         <Form
           form={form}
@@ -218,9 +209,13 @@ export default function RegisterForm() {
 
           {/*พนักงานเกินสัญญา*/}
           <Form.Item name="overContractEmployee" label="พนักงานเกินสัญญา">
-            <InputNumber size="large" min={0} placeholder="กรอกจำนวนคน" />
+            <Input
+              type="number"
+              size="large"
+              min={0}
+              placeholder="กรอกจำนวนคน"
+            />
           </Form.Item>
-
           {/*แทนงาน*/}
           <Form.Item name="replacementEmployee" label="แทนงาน">
             <Input

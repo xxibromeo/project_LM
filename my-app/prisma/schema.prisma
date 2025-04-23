@@ -36,16 +36,15 @@ model LMTimesheetRecords {
 }
 
 model Site {
-  id             Int    @id @unique @default(autoincrement())
-  siteCode       String @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
-  siteName       String
-  numberOfPeople Int
-
+  id                 Int                  @id @unique @default(autoincrement())
+  siteCode           String               @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
+  siteName           String
+  numberOfPeople     Int
   LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
 }
 
-model admin{
-  id  Int @id @unique @default(autoincrement())
+model admin {
+  id          Int    @id @unique @default(autoincrement())
   ID_employee Int
-  name String
+  name        String
 }

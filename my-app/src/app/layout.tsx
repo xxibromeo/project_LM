@@ -1,10 +1,20 @@
-import React from 'react';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
+import React from "react";
+import { Noto_Sans_Thai } from "next/font/google";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { ConfigProvider } from "antd";
+
+const fontThai = Noto_Sans_Thai({ subsets: ["thai"] });
 
 const RootLayout = ({ children }: React.PropsWithChildren) => (
   <html lang="en">
     <body>
-      <AntdRegistry>{children}</AntdRegistry>
+      <AntdRegistry>
+        <ConfigProvider
+          theme={{ token: { fontFamily: fontThai.style.fontFamily } }}
+        >
+          {children}
+        </ConfigProvider>
+      </AntdRegistry>
     </body>
   </html>
 );
