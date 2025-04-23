@@ -41,10 +41,15 @@ model Site {
   siteName           String
   numberOfPeople     Int
   LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
+  SiteEmployees      SiteEmployees[]
 }
 
-model admin {
-  id          Int    @id @unique @default(autoincrement())
-  ID_employee Int
-  name        String
+model SiteEmployees {
+  id             Int      @id @unique @default(autoincrement())
+  site           Site     @relation(fields: [siteCode], references: [siteCode])
+  date           DateTime @default(now())
+  numberOfPeople Int
+  siteCode       String
+  createdAt      DateTime @default(now())
+  updateAt       DateTime @updatedAt
 }
