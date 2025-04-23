@@ -38,9 +38,12 @@ model LMTimesheetRecords {
 
 model Site {
   id                 Int                  @id @unique @default(autoincrement())
+  subSite            String
   siteCode           String               @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
   siteName           String
-  numberOfPeople     Int
+  jobStartDate                   DateTime
+  endOfContractDate               DateTime
+  numberOfPeople     Int //ต้องเป็นเลข dayoff
   LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
   SiteEmployees      SiteEmployees[]
 }
