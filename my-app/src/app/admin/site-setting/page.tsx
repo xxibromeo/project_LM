@@ -6,9 +6,9 @@ import { getAllSites, addSite, updateSite } from "@/app/admin/site-setting/actio
 
 type Site = {
   id: number;
-  siteCode: string;
-  siteName: string;
-  numberOfPeople: number;
+  siteCode: string|null;
+  siteName: string|null;
+  numberOfPeople: number|null;
 };
 
 export default function SiteManagementPage() {

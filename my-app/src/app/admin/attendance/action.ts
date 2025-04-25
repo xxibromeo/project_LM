@@ -4,6 +4,8 @@ import { LMTimesheetRecords } from "@prisma/client";
 
 export type ILMTimesheetRecords = LMTimesheetRecords;
 // ดึงข้อมูลทั้งหมด
+
+
 export async function getAllTimesheets() {
   return await prisma.lMTimesheetRecords.findMany({
     orderBy: { date: "desc" },
@@ -18,19 +20,20 @@ export async function updateTimesheet(
     siteCode: string;
     siteName: string;
     numberOfPeople: number;
+    dailyWorkingEmployees:number;
     workingPeople: number;
     businessLeave: number;
     sickLeave: number;
     peopleLeave: number;
     overContractEmployee: number;
     replacementEmployee: number;
+    replacementNames: string[];
     remark: string;
     nameadmin: string;
-    replacementNames: string;
   }
 ) {
   return await prisma.lMTimesheetRecords.update({
     where: { id },
-    data,
+    data
   });
 }

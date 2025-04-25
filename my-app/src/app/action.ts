@@ -1,28 +1,30 @@
 "use server";
-import { PrismaClient, Site } from "@prisma/client";
+import { PrismaClient, SiteDayOff } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 type TFormValue = {
-  nameadmin: string; 
   date: string;
-  
+  subsite:string;
   siteName: string;
   siteCode: string;
-  businessLeave: number;
   numberOfPeople: number;
+  dailyWorkingEmployees:number;
   workingPeople: number;
+  businessLeave: number;
   sickLeave: number;
   peopleLeave: number;
   overContractEmployee: number;
   replacementEmployee: number;
-  remark: string;
   replacementNames: string[];
+  remark: string;
+  nameadmin: string; 
+
 
 };
-export type ISite = Site;
+export type ISite = SiteDayOff;
 
-export const getAllSiteData = async () => await prisma.site.findMany();
+export const getAllSiteData = async () => await prisma.siteDayOff.findMany();
 
 export const createTimeSheet = async (data: TFormValue) => {
   try {
@@ -37,9 +39,12 @@ export const createTimeSheet = async (data: TFormValue) => {
     const result = await prisma.lMTimesheetRecords.create({
       data: {
         date: data.date,
+        subSite:data.subsite,
         siteCode: data.siteCode,
-        businessLeave: data.businessLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
+        siteName: data.siteName, // ตั้งค่า default เป็น "" ถ้าค่าหาย
         numberOfPeople: data.numberOfPeople || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
+        dailyWorkingEmployees:data.dailyWorkingEmployees||0,
+        businessLeave: data.businessLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
         workingPeople: data.workingPeople || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
         sickLeave: data.sickLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
         peopleLeave: data.peopleLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
@@ -47,8 +52,7 @@ export const createTimeSheet = async (data: TFormValue) => {
         replacementEmployee: data.replacementEmployee || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
         remark: data.remark || "", // ตั้งค่า default เป็น "" ถ้าค่าหาย
         nameadmin: data.nameadmin ?? "ไม่พบชื่อ", // เพิ่มมา
-        replacementNames:data.replacementNames,
-        siteName: data.siteName || "", // ตั้งค่า default เป็น "" ถ้าค่าหาย
+        replacementNames:data.replacementNames??[],
       },
     });
 

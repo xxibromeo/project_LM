@@ -14,46 +14,58 @@ datasource db {
 }
 
 model LMTimesheetRecords {
-  id                   Int      @id @unique @default(autoincrement())
-  date                 DateTime
-  subSite              String
-  siteCode             String
-  siteName             String
-  numberOfPeople       Int
-  workingPeople        Int
-  businessLeave        Int
-  sickLeave            Int
-  peopleLeave          Int
-  overContractEmployee Int
-  replacementEmployee  Int
-  remark               String
-  nameadmin            String
-  replacementNames     String
-  createdAt            DateTime @default(now())
-  updateAt             DateTime @updatedAt
-
+  id                    Int        @id @unique @default(autoincrement())
+  date                  DateTime   @default(now()) // วันที่บันทึก
+  subSite               String
+  siteCode              String
+  siteName              String
+  numberOfPeople        Int // จำนวนคนตามสัญญา
+  dailyWorkingEmployees Int //ตามวันที่กำนดมา
+  workingPeople         Int //กรอกเองจำนวนที่ไปทำงาน
+  businessLeave         Int
+  sickLeave             Int
+  peopleLeave           Int
+  overContractEmployee  Int //เกินสัญญา
+  replacementEmployee   Int
+  replacementNames      String[]
+  remark                String
+  nameadmin             String
+  createdAt             DateTime   @default(now())
+  updateAt              DateTime   @updatedAt
   // สร้างความสัมพันธ์กับ Site
-  site Site @relation(fields: [siteCode], references: [siteCode])
+  site                  Site      @relation(fields: [siteCode], references: [siteCode])
+  siteDayOff            SiteDayOff @relation(fields: [subSite], references: [subSite])
 }
 
 model Site {
-  id                 Int                  @id @unique @default(autoincrement())
-  subSite            String
-  siteCode           String               @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
+  id                 Int               @id @unique @default(autoincrement())
+  siteCode           String             @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
   siteName           String
-  jobStartDate                   DateTime
-  endOfContractDate               DateTime
-  numberOfPeople     Int //ต้องเป็นเลข dayoff
+  clientName         String
+  startDate          DateTime           @default(now()) //วันที่เริ่มสัญญา
+  endDate            DateTime             @default(now())
+  numberOfPeople     Int
+  penaltyRate        Int //ค่าปรับ?
+  typeSite           String
+  adminWage          Int //ธุรการ(ค่าแรง)
+  siteSupervisorName String
   LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
-  SiteEmployees      SiteEmployees[]
+  SiteEmployees      SiteDayOff[]
+  createdAt          DateTime             @default(now())
+  updateAt           DateTime             @updatedAt
 }
 
-model SiteEmployees {
-  id             Int      @id @unique @default(autoincrement())
-  site           Site     @relation(fields: [siteCode], references: [siteCode])
-  date           DateTime @default(now())
-  numberOfPeople Int
-  siteCode       String
-  createdAt      DateTime @default(now())
-  updateAt       DateTime @updatedAt
+model SiteDayOff {
+  id                    Int                  @id @unique @default(autoincrement())
+  workDate              DateTime             @default(now())
+  subSite               String @unique
+  siteCode              String
+  siteName              String
+  typeSite              String
+  numberOfPeople        Int
+  penaltyRate           Int //ค่าปรับ
+  dailyWorkingEmployees Int
+  site                  Site                 @relation(fields: [siteCode], references: [siteCode])
+  LMTimesheetRecords    LMTimesheetRecords[]
+  
 }

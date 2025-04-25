@@ -5,17 +5,18 @@ import type { DatePickerProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import dayjs, { Dayjs } from "dayjs";
-import { createTimeSheet, getAllSiteData, ISite } from "./action";
+import { createTimeSheet, getAllSiteData,ISite } from "./action";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
 
 type TFormValue = {
-  site: string;
   date: Date;
-  subSite:number;
+  subSite:string;
   siteCode: string;
+  siteName:string;
   numberOfPeople: number;
+  dailyWorkingEmployees:number;
   workingPeople: number;
   businessLeave: number;
   sickLeave: number;
@@ -24,13 +25,14 @@ type TFormValue = {
   replacementEmployee: number;
   replacementNames: string[];
   remark: string;
-  nameadmit: string;
+  nameadmin: string;
 };
 
 export default function RegisterForm() {
   const [form] = Form.useForm();
   const [replacementCount, setReplacementCount] = useState(0);
   const [siteData, setSiteData] = useState<ISite[]>([]);
+
 
   useEffect(() => {
     getSiteData();
@@ -79,23 +81,24 @@ export default function RegisterForm() {
 
   // ฟังก์ชันเรียกใช้เมื่อกด Submit
   const onFinish = async (values: TFormValue) => {
+
     console.log("Form Values:", values);
     const save = await createTimeSheet({
-      date: values.date.toISOString(),
-      subSite:values.subSite,
+      date: values.date?.toISOString() ?? new Date().toISOString(),
+      subsite: values.subSite,
       siteCode: values.siteCode,
-      numberOfPeople: values.numberOfPeople,
-      workingPeople: values.workingPeople,
-      businessLeave: values.businessLeave,
-      sickLeave: values.sickLeave,
-      peopleLeave: values.peopleLeave,
-      overContractEmployee: values.overContractEmployee,
-      replacementEmployee: values.replacementEmployee,
+      siteName: siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
+      numberOfPeople: values.numberOfPeople?? 0,
+      dailyWorkingEmployees: 0,
+      workingPeople: values.workingPeople?? 0,
+      businessLeave: values.businessLeave?? 0,
+      sickLeave: values.sickLeave??0,
+      peopleLeave: values.peopleLeave?? 0,
+      overContractEmployee: values.overContractEmployee??0,
+      replacementEmployee: values.replacementEmployee??0,
+      replacementNames: values.replacementNames??[],
       remark: values.remark,
-      siteName:
-        siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
       nameadmin: "",
-      replacementNames: values.replacementNames,
     });
     if (save) {
       form.resetFields();
