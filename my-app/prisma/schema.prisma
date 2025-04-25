@@ -47,9 +47,9 @@ model Site {
   numberOfPeople     Int
   penaltyRate        Int //ค่าปรับ?
   typeSite           String
-  adminWage          Int //ธุรการ(ค่าแรง)
+  adminWage          String //ธุรการ(ค่าแรง)
   siteSupervisorName String
-  LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
+  LMTimesheetRecords LMTimesheetRecords[]// เชื่อมโยงกลับจาก LMTimesheetRecords
   SiteEmployees      SiteDayOff[]
   createdAt          DateTime             @default(now())
   updateAt           DateTime             @updatedAt
