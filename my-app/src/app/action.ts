@@ -52,7 +52,7 @@ export const createTimeSheet = async (data: TFormValue) => {
         replacementEmployee: data.replacementEmployee || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
         remark: data.remark || "", // ตั้งค่า default เป็น "" ถ้าค่าหาย
         nameadmin: data.nameadmin ?? "ไม่พบชื่อ", // เพิ่มมา
-        replacementNames:data.replacementNames??[],
+        replacementNames:data.replacementNames??[""],
       },
     });
 

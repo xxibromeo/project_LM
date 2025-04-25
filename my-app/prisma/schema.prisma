@@ -34,7 +34,6 @@ model LMTimesheetRecords {
   updateAt              DateTime   @updatedAt
   // สร้างความสัมพันธ์กับ Site
   site                  Site      @relation(fields: [siteCode], references: [siteCode])
-  siteDayOff            SiteDayOff @relation(fields: [subSite], references: [subSite])
 }
 
 model Site {
@@ -66,6 +65,5 @@ model SiteDayOff {
   penaltyRate           Int //ค่าปรับ
   dailyWorkingEmployees Int
   site                  Site                 @relation(fields: [siteCode], references: [siteCode])
-  LMTimesheetRecords    LMTimesheetRecords[]
   
 }

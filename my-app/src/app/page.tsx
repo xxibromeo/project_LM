@@ -42,9 +42,9 @@ export default function RegisterForm() {
     const site = await getAllSiteData();
     setSiteData(site);
   };
-  // ย้าย onSitechange มาประกาศภายใน component
+
   const onSitechange = (value: string) => {
-    const selectedSite = siteData.find((site) => site.siteCode === value);
+    const selectedSite = siteData.find((SiteDayOff) => SiteDayOff.subSite === value);
     form.setFieldsValue({ numberOfPeople: selectedSite?.numberOfPeople });
     form.setFieldsValue({ workingPeople: selectedSite?.numberOfPeople });
   };
@@ -96,8 +96,8 @@ export default function RegisterForm() {
       peopleLeave: values.peopleLeave?? 0,
       overContractEmployee: values.overContractEmployee??0,
       replacementEmployee: values.replacementEmployee??0,
-      replacementNames: values.replacementNames??[],
-      remark: values.remark,
+      replacementNames: values.replacementNames??[""],
+      remark: values.remark??"",
       nameadmin: "",
     });
     if (save) {
@@ -130,9 +130,9 @@ export default function RegisterForm() {
             rules={[{ required: true, message: "กรุณาเลือก Site" }]} //กฏที่เราต้องการให้ทำ
           >
             <Select placeholder="เลือก Site" onChange={onSitechange}>
-              {siteData.map((site) => (
-                <Option key={site.siteCode} value={site.siteCode}>
-                  {site.siteName}
+              {siteData.map((SiteDayOff) => (
+                <Option key={SiteDayOff.subSite} value={SiteDayOff.subSite}>
+                  {SiteDayOff.siteName}
                 </Option>
               ))}
             </Select>
@@ -154,7 +154,7 @@ export default function RegisterForm() {
           </Form.Item>
 
           {/* Number of People */}
-          <Form.Item name="numberOfPeople" label="พนักงานประจำ (จากฐานข้อมูล)">
+          <Form.Item name="numberOfPeople" label="พนักงานตามสัญญา">
             <Input
               type="number"
               disabled
@@ -165,7 +165,7 @@ export default function RegisterForm() {
             />
           </Form.Item>
 
-          <Form.Item name="workingPeople" label="พนักงานประจำที่เหลือ">
+          <Form.Item name="workingPeople" label="พนักงานตามสัญญาประจำวัน">
             <Input
               type="number"
               disabled
@@ -175,6 +175,17 @@ export default function RegisterForm() {
               onChange={() => recalculateWorkingPeople()} //ถามข้อแตกต่างระหว่าง onchangeเฉยๆ
             />
           </Form.Item>
+
+          <Form.Item name="dailyWorkingEmployees" label="พนักงานประจำ (ที่มาทำงาน)">
+            <Input
+              type="number"
+              disabled
+              size="large"
+              min={1}
+              className="w-full"
+            />
+          </Form.Item>
+
 
           {/*ลากิจ*/}
           <Form.Item name="businessLeave" label="ลากิจ">
@@ -257,7 +268,7 @@ export default function RegisterForm() {
 
           {/*หมายเหตุ*/}
           <Form.Item name="remark" label="หมายเหตุ">
-            <TextArea rows={4} placeholder="หมายเหตุ" maxLength={6} />
+            <TextArea rows={4} placeholder="หมายเหตุ" />
           </Form.Item>
 
           <Form.Item>
