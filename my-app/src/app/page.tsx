@@ -5,7 +5,7 @@ import type { DatePickerProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import dayjs, { Dayjs } from "dayjs";
-import { createTimeSheet, getAllSiteData,ISite } from "./action";
+import { createTimeSheet, getAllSiteData,getDailyWorkingPeople,ISite } from "./action";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
@@ -49,7 +49,9 @@ export default function RegisterForm() {
     form.setFieldsValue({ workingPeople: selectedSite?.numberOfPeople });
   };
 
+ 
   // ฟังก์ชันสำหรับคำนวณใหม่ทุกครั้งที่มีการเปลี่ยนแปลง
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const recalculateWorkingPeople = () => {
     const numberOfPeople = form.getFieldValue("numberOfPeople") || 0; //*อันนี้หมายถึงถ้าซ้ายมีค่าที่เป็นอย่างอื่นนอกจากตัวเลขให้คิดเป็น 0
     const businessLeave = form.getFieldValue("businessLeave") || 0;
@@ -161,7 +163,6 @@ export default function RegisterForm() {
               size="large"
               min={1}
               className="w-1/2"
-              placeholder="กรอกจำนวนคน"
             />
           </Form.Item>
 
@@ -172,14 +173,12 @@ export default function RegisterForm() {
               size="large"
               min={1}
               className="w-full"
-              onChange={() => recalculateWorkingPeople()} //ถามข้อแตกต่างระหว่าง onchangeเฉยๆ
             />
           </Form.Item>
 
           <Form.Item name="dailyWorkingEmployees" label="พนักงานประจำ (ที่มาทำงาน)">
             <Input
               type="number"
-              disabled
               size="large"
               min={1}
               className="w-full"
@@ -195,7 +194,6 @@ export default function RegisterForm() {
               min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
-              onChange={() => recalculateWorkingPeople()}
             />
           </Form.Item>
 
@@ -207,7 +205,6 @@ export default function RegisterForm() {
               min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
-              onChange={() => recalculateWorkingPeople()}
             />
           </Form.Item>
 
@@ -219,7 +216,6 @@ export default function RegisterForm() {
               min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
-              onChange={() => recalculateWorkingPeople()}
             />
           </Form.Item>
 

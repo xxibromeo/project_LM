@@ -65,3 +65,14 @@ export const createTimeSheet = async (data: TFormValue) => {
     return null; // หากเกิดข้อผิดพลาดจาก Prisma จะ return null
   }
 };
+
+export async function getDailyWorkingPeople(subSite: string, date: string | Date) {
+  const result = await prisma.siteDayOff.findFirst({
+    where: {
+      subSite,
+      workDate: new Date(date),
+    },
+  });
+
+  return result?.dailyWorkingEmployees ?? 0;
+}
