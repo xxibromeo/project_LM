@@ -4,7 +4,7 @@ import { PrismaClient, SiteDayOff } from "@prisma/client";
 const prisma = new PrismaClient();
 
 type TFormValue = {
-  date: string;
+  date: Date;
   subsite:string;
   siteName: string;
   siteCode: string;

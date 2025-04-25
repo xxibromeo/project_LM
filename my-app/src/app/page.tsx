@@ -84,7 +84,7 @@ export default function RegisterForm() {
 
     console.log("Form Values:", values);
     const save = await createTimeSheet({
-      date: values.date?.toISOString() ?? new Date().toISOString(),
+      date: values.date,
       subsite: values.subSite,
       siteCode: values.siteCode,
       siteName: siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
@@ -97,7 +97,7 @@ export default function RegisterForm() {
       overContractEmployee: values.overContractEmployee??0,
       replacementEmployee: values.replacementEmployee??0,
       replacementNames: values.replacementNames??[""],
-      remark: values.remark??"",
+      remark: values.remark??[],
       nameadmin: "",
     });
     if (save) {
@@ -268,7 +268,7 @@ export default function RegisterForm() {
 
           {/*หมายเหตุ*/}
           <Form.Item name="remark" label="หมายเหตุ">
-            <TextArea rows={4} placeholder="หมายเหตุ" />
+            <TextArea rows={4} placeholder="หมายเหตุ" maxLength={6} />
           </Form.Item>
 
           <Form.Item>
