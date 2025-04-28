@@ -1,14 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Table, Modal, Form, Input, InputNumber, Button } from "antd";
-import { getAllSites, addSite, updateSite } from "@/app/admin/site-setting/action";
+import {
+  Table,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Button,
+  DatePicker,
+} from "antd";
+import {
+  getAllSites,
+  addSite,
+  updateSite,
+} from "@/app/admin/site-setting/action";
 
 type Site = {
   id: number;
-  siteCode: string|null;
-  siteName: string|null;
-  numberOfPeople: number|null;
+  siteCode: string | null;
+  siteName: string | null;
+  numberOfPeople: number | null;
 };
 
 export default function SiteManagementPage() {
@@ -28,11 +40,22 @@ export default function SiteManagementPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFinish = async (values: any) => {
-    if (editingSite) {
-      await updateSite(editingSite.id, values);
-    } else {
-      await addSite(values);
+    const payload = {
+      ...values,
+      startDate: values.startDate ? values.startDate.toDate() : undefined,
+      endDate: values.endDate ? values.endDate.toDate() : undefined,
+    };
+
+    if (!editingSite) {
+      delete payload.id; // ⭐ ต้องลบ id ตอนเพิ่ม
     }
+
+    if (editingSite) {
+      await updateSite(editingSite.id, payload);
+    } else {
+      await addSite(payload);
+    }
+
     fetchSites();
     form.resetFields();
     setEditingSite(null);
@@ -58,15 +81,17 @@ export default function SiteManagementPage() {
           {
             title: "Actions",
             render: (_, record: Site) => (
-              <Button onClick={() => {
-                setEditingSite(record);
-                form.setFieldsValue(record);
-                setOpenModal(true);
-              }}>
+              <Button
+                onClick={() => {
+                  setEditingSite(record);
+                  form.setFieldsValue(record);
+                  setOpenModal(true);
+                }}
+              >
                 แก้ไข
               </Button>
-            )
-          }
+            ),
+          },
         ]}
       />
 
@@ -81,14 +106,81 @@ export default function SiteManagementPage() {
         onOk={() => form.submit()}
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item label="Site Code" name="siteCode" rules={[{ required: true }]}>
+          <Form.Item
+            label="Site Code"
+            name="siteCode"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="Site Name" name="siteName" rules={[{ required: true }]}>
+          <Form.Item
+            label="Site Name"
+            name="siteName"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="จำนวนคน" name="numberOfPeople" rules={[{ required: true }]}>
+          <Form.Item
+            label="Client Name"
+            name="clientName"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Start Date"
+            name="startDate"
+            rules={[{ required: true }]}
+          >
+            <DatePicker className="w-full" />
+          </Form.Item>
+
+          <Form.Item
+            label="End Date"
+            name="endDate"
+            rules={[{ required: true }]}
+          >
+            <DatePicker className="w-full" />
+          </Form.Item>
+
+          <Form.Item
+            label="จำนวนคน"
+            name="numberOfPeople"
+            rules={[{ required: true }]}
+          >
             <InputNumber min={1} className="w-full" />
+          </Form.Item>
+          <Form.Item
+            label="Penalty Rate"
+            name="penaltyRate"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={0} className="w-full" />
+          </Form.Item>
+
+          <Form.Item
+            label="Type Site"
+            name="typeSite"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Admin Wage"
+            name="adminWage"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Site Supervisor Name"
+            name="siteSupervisorName"
+            rules={[{ required: true }]}
+          >
+            <Input />
           </Form.Item>
         </Form>
       </Modal>
