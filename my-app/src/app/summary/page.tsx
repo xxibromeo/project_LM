@@ -32,7 +32,7 @@ export default function SummaryPage() {
 
   const formatValue = (
     value: string | number | string[] | null | undefined,
-    key?: string // ✨ เพิ่ม key มาด้วย
+    key?: string
   ) => {
     if (key === "date" && typeof value === "string") {
       const date = new Date(value);
@@ -42,10 +42,17 @@ export default function SummaryPage() {
         year: "numeric",
       });
     }
-    if (Array.isArray(value)) return value.join(", ");
+    if (Array.isArray(value)) {
+      // 🔥 เช็กถ้าเป็น replacementNames ให้ใส่ลำดับด้วย
+      if (key === "replacementNames") {
+        return value.map((name, index) => `${index + 1}. ${name}`).join("\n ");
+      }
+      return value.join("\n ");
+    }
     if (value === null || value === undefined || value === "") return "-";
     return value;
   };
+  
 
   const goToEditPage = () => {
     if (parsedData) {
@@ -74,7 +81,7 @@ export default function SummaryPage() {
                   <p className="text-[#E30613] font-semibold text-base">
                     {fieldMapping[key] ?? key}
                   </p>
-                  <p className="text-black text-base">
+                  <p className="text-black text-base whitespace-pre-line">
                     {formatValue(
                       value as string | number | string[] | null | undefined,
                       key // ✨ ส่ง key เข้าไป
