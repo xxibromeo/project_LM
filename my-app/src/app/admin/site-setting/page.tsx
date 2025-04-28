@@ -147,16 +147,14 @@ export default function SiteManagementPage() {
           <Form.Item
             label="จำนวนคน"
             name="numberOfPeople"
-            rules={[{ required: true }]}
-          >
-            <InputNumber min={1} className="w-full" />
+            rules={[{ required: true }]}>
+            <Input type="number" min={1} className="w-full" />
           </Form.Item>
           <Form.Item
             label="Penalty Rate"
             name="penaltyRate"
-            rules={[{ required: true }]}
           >
-            <InputNumber min={0} className="w-full" />
+            <Input type="number" min={0} className="w-full" />
           </Form.Item>
 
           <Form.Item
@@ -170,7 +168,7 @@ export default function SiteManagementPage() {
           <Form.Item
             label="Admin Wage"
             name="adminWage"
-            rules={[{ required: true }]}
+            
           >
             <Input />
           </Form.Item>
@@ -178,7 +176,7 @@ export default function SiteManagementPage() {
           <Form.Item
             label="Site Supervisor Name"
             name="siteSupervisorName"
-            rules={[{ required: true }]}
+            
           >
             <Input />
           </Form.Item>
