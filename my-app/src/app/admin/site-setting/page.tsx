@@ -76,8 +76,8 @@ export default function SiteManagementPage() {
           { title: "Site Name", dataIndex: "siteName" },
           { title: "จำนวนคน", dataIndex: "numberOfPeople" },
           { title: "ชื่อลูกค้า", dataIndex: "clientName" },
-          { title: "วันที่เริ่มงาน", dataIndex: "startDate" },
-          { title: "วันที่สิ้นสุดงาน", dataIndex: "endDate" },
+          { title: "วันที่เริ่มงาน", dataIndex: "startDate" ,render: (date: Date) => date ? dayjs(date).format("YYYY-MM-DD") : "-"},
+          { title: "วันที่สิ้นสุดงาน", dataIndex: "endDate",render: (date: Date) => date ? dayjs(date).format("YYYY-MM-DD") : "-" },
           {
             title: "Actions",
             render: (_, record: Site) => (
