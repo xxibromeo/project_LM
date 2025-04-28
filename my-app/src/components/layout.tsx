@@ -33,6 +33,12 @@ export const menuItems = [
     icon: <SettingOutlined />,
     path: "/admin/site-setting",
   },
+  {
+    key: "dayoff",
+    label: "ตั้งค่า Site dayoff",
+    icon: <SettingOutlined />,
+    path: "/admin/dayoff",
+  },
 ];
  
 export default function SharedLayout({ children }: React.PropsWithChildren) {
