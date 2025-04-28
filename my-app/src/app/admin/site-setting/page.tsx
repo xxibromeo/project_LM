@@ -1,15 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Table,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Button,
-  DatePicker,
-} from "antd";
+import dayjs from "dayjs"; // เพิ่ม import นี้ที่หัวไฟล์ด้วย
+
+import { Table, Modal, Form, Input, Button, DatePicker } from "antd";
 import {
   getAllSites,
   addSite,
@@ -17,10 +11,13 @@ import {
 } from "@/app/admin/site-setting/action";
 
 type Site = {
+  endDate: Date;
+  startDate: Date;
   id: number;
   siteCode: string | null;
   siteName: string | null;
   numberOfPeople: number | null;
+  clientName: string | null;
 };
 
 export default function SiteManagementPage() {
@@ -78,13 +75,25 @@ export default function SiteManagementPage() {
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
           { title: "จำนวนคน", dataIndex: "numberOfPeople" },
+          { title: "ชื่อลูกค้า", dataIndex: "clientName" },
+          { title: "วันที่เริ่มงาน", dataIndex: "startDate" },
+          { title: "วันที่สิ้นสุดงาน", dataIndex: "endDate" },
           {
             title: "Actions",
             render: (_, record: Site) => (
               <Button
                 onClick={() => {
                   setEditingSite(record);
-                  form.setFieldsValue(record);
+                  form.setFieldsValue({
+                    ...record,
+                    startDate: record.startDate
+                      ? dayjs(new Date(record.startDate))
+                      : null,
+                    endDate: record.endDate
+                      ? dayjs(new Date(record.endDate))
+                      : null,
+                  });
+
                   setOpenModal(true);
                 }}
               >
@@ -147,13 +156,11 @@ export default function SiteManagementPage() {
           <Form.Item
             label="จำนวนคน"
             name="numberOfPeople"
-            rules={[{ required: true }]}>
+            rules={[{ required: true }]}
+          >
             <Input type="number" min={1} className="w-full" />
           </Form.Item>
-          <Form.Item
-            label="Penalty Rate"
-            name="penaltyRate"
-          >
+          <Form.Item label="Penalty Rate" name="penaltyRate">
             <Input type="number" min={0} className="w-full" />
           </Form.Item>
 
@@ -165,19 +172,11 @@ export default function SiteManagementPage() {
             <Input />
           </Form.Item>
 
-          <Form.Item
-            label="Admin Wage"
-            name="adminWage"
-            
-          >
+          <Form.Item label="Admin Wage" name="adminWage">
             <Input />
           </Form.Item>
 
-          <Form.Item
-            label="Site Supervisor Name"
-            name="siteSupervisorName"
-            
-          >
+          <Form.Item label="Site Supervisor Name" name="siteSupervisorName">
             <Input />
           </Form.Item>
         </Form>
