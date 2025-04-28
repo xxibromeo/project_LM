@@ -171,7 +171,7 @@ export default function RegisterForm() {
             />
           </Form.Item>
 
-          <Form.Item name="workingPeople" label="พนักงานตามสัญญาประจำวัน">
+          <Form.Item name="workingPeople" label="พนักงานปรนะจำตามแผนส่งคนรายวัน">
             <Input
               type="number"
               disabled
@@ -189,7 +189,7 @@ export default function RegisterForm() {
           </Form.Item>
 
           {/*ลากิจ*/}
-          <Form.Item name="businessLeave" label="ลากิจ">
+          <Form.Item name="businessLeave" label="ลากิจ (พนักงานประจำ)" >
             <Input
               type="number"
               size="large"
@@ -200,7 +200,7 @@ export default function RegisterForm() {
           </Form.Item>
 
           {/*ลาป่วย*/}
-          <Form.Item name="sickLeave" label="ลาป่วย">
+          <Form.Item name="sickLeave" label="ลาป่วย (พนักงานประจำ)">
             <Input
               type="number"
               size="large"
@@ -211,7 +211,7 @@ export default function RegisterForm() {
           </Form.Item>
 
           {/*ขาดงาน*/}
-          <Form.Item name="peopleLeave" label="ขาดงาน">
+          <Form.Item name="peopleLeave" label="ขาดงาน (พนักงานประจำ)">
             <Input
               type="number"
               size="large"
@@ -231,7 +231,7 @@ export default function RegisterForm() {
             />
           </Form.Item>
           {/*แทนงาน*/}
-          <Form.Item name="replacementEmployee" label="แทนงาน">
+          <Form.Item name="replacementEmployee" label="จำนวนคนแทนงาน">
             <Input
               type="number"
               size="large"
