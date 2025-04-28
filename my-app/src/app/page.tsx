@@ -48,18 +48,17 @@ export default function RegisterForm() {
     const selectedDate = form.getFieldValue("date"); // ดึงวันที่ที่เลือกในฟอร์ม
     const selectedSite = siteData.find((SiteDayOff) => {
       return (
-        SiteDayOff.subSite === subSite &&  // ใช้ subSite ตรงๆ
+        SiteDayOff.subSite === subSite && // ใช้ subSite ตรงๆ
         dayjs(SiteDayOff.workDate).isSame(selectedDate, "day")
       );
     });
-  
+
     form.setFieldsValue({
       numberOfPeople: selectedSite?.numberOfPeople ?? 0,
       workingPeople: selectedSite?.dailyWorkingEmployees ?? 0,
       siteName: selectedSite?.siteName ?? "", // ✅ ใส่ siteName ด้วย
     });
   };
-  
 
   // กำหนดวันที่เป็นวันนี้ และไม่ให้แก้ไข
   const dateFormat = "DD-MM-YYYY";
@@ -82,11 +81,12 @@ export default function RegisterForm() {
 
   const onFinish = async (values: TFormValue) => {
     const selectedDate = values.date;
-    const selectedSite = siteData.find((i) => 
-      i.subSite === values.subSite &&
-      dayjs(i.workDate).isSame(selectedDate, "day")
+    const selectedSite = siteData.find(
+      (i) =>
+        i.subSite === values.subSite &&
+        dayjs(i.workDate).isSame(selectedDate, "day")
     );
-  
+
     const dataToSend = {
       date: values.date,
       subSite: selectedSite?.subSite ?? "",
@@ -104,15 +104,17 @@ export default function RegisterForm() {
       remark: typeof values.remark === "string" ? values.remark : "",
       nameadmin: "",
     };
-    
+
     const save = await createTimeSheet(dataToSend);
-  
+
     if (save) {
       form.resetFields();
-      router.push(`/summary?data=${encodeURIComponent(JSON.stringify(dataToSend))}`);
+      router.push(
+        `/summary?data=${encodeURIComponent(JSON.stringify(dataToSend))}`
+      );
     }
   };
-  
+
   // ปิดการแก้ไข DatePicker (disabled)
   const disabledDatePicker: DatePickerProps["disabledDate"] = () => true;
 
@@ -161,7 +163,7 @@ export default function RegisterForm() {
           </Form.Item>
 
           {/* Number of People */}
-          <Form.Item name="numberOfPeople" label="พนักงานตามสัญญา">
+          <Form.Item name="numberOfPeople" label="พนักงานตามสัญญา" >
             <Input
               type="number"
               disabled
@@ -171,7 +173,11 @@ export default function RegisterForm() {
             />
           </Form.Item>
 
-          <Form.Item name="workingPeople" label="พนักงานปรนะจำตามแผนส่งคนรายวัน">
+          <Form.Item
+            name="workingPeople"
+            label="พนักงานปรนะจำตามแผนส่งคนรายวัน"
+            
+          >
             <Input
               type="number"
               disabled
@@ -184,16 +190,18 @@ export default function RegisterForm() {
           <Form.Item
             name="dailyWorkingEmployees"
             label="พนักงานประจำ (ที่มาทำงาน)"
+            rules={[{ required: true}]}
           >
             <Input type="number" size="large" min={1} className="w-full" />
           </Form.Item>
 
           {/*ลากิจ*/}
-          <Form.Item name="businessLeave" label="ลากิจ (พนักงานประจำ)" >
+          <Form.Item name="businessLeave" label="ลากิจ (พนักงานประจำ)">
             <Input
               type="number"
               size="large"
               min={0}
+              defaultValue={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
             />
@@ -207,6 +215,7 @@ export default function RegisterForm() {
               min={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
+              defaultValue={0}
             />
           </Form.Item>
 
@@ -216,6 +225,7 @@ export default function RegisterForm() {
               type="number"
               size="large"
               min={0}
+              defaultValue={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
             />
@@ -227,6 +237,7 @@ export default function RegisterForm() {
               type="number"
               size="large"
               min={0}
+              defaultValue={0}
               placeholder="กรอกจำนวนคน"
             />
           </Form.Item>
@@ -236,6 +247,7 @@ export default function RegisterForm() {
               type="number"
               size="large"
               min={0}
+              defaultValue={0}
               className="w-full"
               placeholder="กรอกจำนวนคน"
               onChange={(e) => {
@@ -254,7 +266,7 @@ export default function RegisterForm() {
                 key={index}
                 name={["replacementNames", index]}
                 label={`ชื่อคนแทนงาน ${index + 1}`}
-                rules={[{ required: true, message: "กรุณากรอกชื่อคนแทนงาน" }]}
+                rules={replacementCount > 0 ? [{ required: true, message: "กรุณากรอกชื่อคนแทนงาน" }] : []}
               >
                 <Input
                   placeholder={`กรอกชื่อคนแทนงาน ${index + 1}`}
