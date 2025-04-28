@@ -1,17 +1,18 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, Button, Divider } from "antd";
+import Image from "next/image";
 
 export default function SummaryPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const dataString = searchParams.get("data");
 
   const parsedData = dataString
     ? JSON.parse(decodeURIComponent(dataString))
     : null;
 
-  // ฟังก์ชันแปลงชื่อ field เป็นภาษาไทย
   const fieldMapping: { [key: string]: string } = {
     date: "วันที่",
     subSite: "Sub Site",
@@ -27,11 +28,8 @@ export default function SummaryPage() {
     replacementEmployee: "จำนวนคนแทนงาน",
     replacementNames: "ชื่อคนแทนงาน",
     remark: "หมายเหตุ",
-    nameadmin: "ชื่อแอดมิน",
   };
 
-  // ฟังก์ชันแปลงค่าที่แสดง
-  // ฟังก์ชันแปลงค่าที่แสดง
   const formatValue = (
     value: string | number | string[] | null | undefined
   ) => {
@@ -40,39 +38,66 @@ export default function SummaryPage() {
     return value;
   };
 
+  const goToEditPage = () => {
+    if (parsedData) {
+      router.push(`/edit?data=${encodeURIComponent(JSON.stringify(parsedData))}`);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <Card className="w-full max-w-3xl">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          สรุปข้อมูลที่บันทึกแล้ว
-        </h1>
+        <div className="flex flex-col items-center mb-6">
+          <Image
+            src="/logo-SO.webp"
+            alt="Logo"
+            width={64}
+            height={64}
+          />
+          <h1 className="text-2xl font-bold text-[#E30613] mt-4">
+            สรุปข้อมูลที่บันทึกแล้ว
+          </h1>
+        </div>
 
         {parsedData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(parsedData).map(([key, value]) => (
-              <div key={key}>
-                <p className="text-gray-500 text-sm">
-                  {fieldMapping[key] ?? key}
-                </p>
-                <p className="text-lg font-semibold">
-                  {formatValue(
-                    value as string | number | string[] | null | undefined
-                  )}
-                </p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            {Object.entries(parsedData)
+              .filter(([key]) => key !== "nameadmin")
+              .map(([key, value]) => (
+                <div key={key}>
+                  <p className="text-[#E30613] font-semibold text-base">
+                    {fieldMapping[key] ?? key}
+                  </p>
+                  <p className="text-black text-base">
+                    {formatValue(
+                      value as string | number | string[] | null | undefined
+                    )}
+                  </p>
+                </div>
+              ))}
           </div>
         ) : (
           <p className="text-center text-gray-500">ไม่พบข้อมูล</p>
         )}
 
-        <Divider />
+        <Divider className="my-10" />
 
-        <div className="flex justify-center gap-4 mt-6">
-          <Button type="default" onClick={() => history.back()}>
-            กลับไปแก้ไข
+        <div className="flex justify-center gap-6">
+          <Button
+            type="default"
+            size="large"
+            className="border-[#E30613] text-[#E30613]"
+            onClick={goToEditPage}
+          >
+            แก้ไขข้อมูล
           </Button>
-          <Button type="primary">ยืนยันข้อมูล</Button>
+          <Button
+            type="primary"
+            size="large"
+            className="bg-[#E30613] text-white border-none"
+          >
+            ยืนยันข้อมูล
+          </Button>
         </div>
       </Card>
     </div>
