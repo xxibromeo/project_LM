@@ -6,13 +6,18 @@ import TextArea from "antd/es/input/TextArea";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import dayjs, { Dayjs } from "dayjs";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createTimeSheet, getAllSiteData,getDailyWorkingPeople,ISite } from "./action";
+import {
+  createTimeSheet,
+  getAllSiteData,
+  getDailyWorkingPeople,
+  ISite,
+} from "./action";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
 
 type TFormValue = {
-   date: Date;
+  date: Date;
   subSite: string;
   siteCode: string;
   siteName: string;
@@ -34,7 +39,6 @@ export default function RegisterForm() {
   const [replacementCount, setReplacementCount] = useState(0);
   const [siteData, setSiteData] = useState<ISite[]>([]);
 
-
   useEffect(() => {
     getSiteData();
   }, []);
@@ -49,31 +53,14 @@ export default function RegisterForm() {
     const selectedSite = siteData.find((SiteDayOff) => {
       return (
         SiteDayOff.siteCode === value &&
-        dayjs(SiteDayOff.workDate).isSame(selectedDate, 'day') // เช็กว่า workDate ตรงกับวันที่เลือก
+        dayjs(SiteDayOff.workDate).isSame(selectedDate, "day") // เช็กว่า workDate ตรงกับวันที่เลือก
       );
     });
-  
+
     form.setFieldsValue({
       numberOfPeople: selectedSite?.numberOfPeople ?? 0,
-      workingPeople: selectedSite?.numberOfPeople ?? 0,
-      dailyWorkingEmployees: selectedSite?.dailyWorkingEmployees ?? 0,
+      workingPeople: selectedSite?.dailyWorkingEmployees ?? 0,
     });
-  };
-  
- 
-  // ฟังก์ชันสำหรับคำนวณใหม่ทุกครั้งที่มีการเปลี่ยนแปลง
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const recalculateWorkingPeople = () => {
-    const numberOfPeople = form.getFieldValue("numberOfPeople") || 0; //*อันนี้หมายถึงถ้าซ้ายมีค่าที่เป็นอย่างอื่นนอกจากตัวเลขให้คิดเป็น 0
-    const businessLeave = form.getFieldValue("businessLeave") || 0;
-    const sickLeave = form.getFieldValue("sickLeave") || 0;
-    const peopleLeave = form.getFieldValue("peopleLeave") || 0;
-
-    // คำนวณยอดพนักงานที่เหลือ
-    const workingPeople =
-      numberOfPeople - (businessLeave + sickLeave + peopleLeave);
-    form.setFieldsValue({ workingPeople });
-    console.log(businessLeave, sickLeave);
   };
 
   // กำหนดวันที่เป็นวันนี้ และไม่ให้แก้ไข
@@ -95,32 +82,31 @@ export default function RegisterForm() {
   // ฟังก์ชันเรียกใช้เมื่อกด Submit
   const onFinish = async (values: TFormValue) => {
     const selectedSite = siteData.find((i) => i.siteCode === values.siteCode);
-  
+
     const save = await createTimeSheet({
       date: values.date,
-      subsite:selectedSite?.subSite ??"",
+      subsite: selectedSite?.subSite ?? "",
       siteCode: values.siteCode,
       siteName: selectedSite?.siteName ?? "",
-      numberOfPeople: values.numberOfPeople ?? 0,
-      dailyWorkingEmployees: values.dailyWorkingEmployees ?? 0,
-      workingPeople: values.workingPeople ?? 0,
-      businessLeave: values.businessLeave ?? 0,
-      sickLeave: values.sickLeave ?? 0,
-      peopleLeave: values.peopleLeave ?? 0,
-      overContractEmployee: values.overContractEmployee ?? 0,
-      replacementEmployee: values.replacementEmployee ?? 0,
+      numberOfPeople: Number(values.numberOfPeople) ?? 0,
+      dailyWorkingEmployees: Number(values.dailyWorkingEmployees) ?? 0,
+      workingPeople: Number(values.workingPeople) ?? 0,
+      businessLeave: Number(values.businessLeave) ?? 0,
+      sickLeave: Number(values.sickLeave) ?? 0,
+      peopleLeave: Number(values.peopleLeave) ?? 0,
+      overContractEmployee: Number(values.overContractEmployee) ?? 0,
+      replacementEmployee: Number(values.replacementEmployee) ?? 0,
+
       replacementNames: values.replacementNames ?? [""],
       remark: typeof values.remark === "string" ? values.remark : "",
       nameadmin: "",
     });
-  
+
     if (save) {
       form.resetFields();
       alert("ลงทะเบียนสำเร็จ");
     }
   };
-  
-  
 
   // ปิดการแก้ไข DatePicker (disabled)
   const disabledDatePicker: DatePickerProps["disabledDate"] = () => true;
@@ -190,15 +176,12 @@ export default function RegisterForm() {
             />
           </Form.Item>
 
-          <Form.Item name="dailyWorkingEmployees" label="พนักงานประจำ (ที่มาทำงาน)">
-            <Input
-              type="number"
-              size="large"
-              min={1}
-              className="w-full"
-            />
+          <Form.Item
+            name="dailyWorkingEmployees"
+            label="พนักงานประจำ (ที่มาทำงาน)"
+          >
+            <Input type="number" size="large" min={1} className="w-full" />
           </Form.Item>
-
 
           {/*ลากิจ*/}
           <Form.Item name="businessLeave" label="ลากิจ">
