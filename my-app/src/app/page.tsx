@@ -12,12 +12,12 @@ import { useEffect, useState } from "react";
 const { Option } = Select;
 
 type TFormValue = {
-  date: Date;
-  subSite:string;
+   date: Date;
+  subSite: string;
   siteCode: string;
-  siteName:string;
+  siteName: string;
   numberOfPeople: number;
-  dailyWorkingEmployees:number;
+  dailyWorkingEmployees: number;
   workingPeople: number;
   businessLeave: number;
   sickLeave: number;
@@ -45,11 +45,21 @@ export default function RegisterForm() {
   };
 
   const onSitechange = (value: string) => {
-    const selectedSite = siteData.find((SiteDayOff) => SiteDayOff.subSite === value);
-    form.setFieldsValue({ numberOfPeople: selectedSite?.numberOfPeople });
-    form.setFieldsValue({ workingPeople: selectedSite?.numberOfPeople });
+    const selectedDate = form.getFieldValue("date"); // ดึงวันที่ที่เลือกในฟอร์ม
+    const selectedSite = siteData.find((SiteDayOff) => {
+      return (
+        SiteDayOff.siteCode === value &&
+        dayjs(SiteDayOff.workDate).isSame(selectedDate, 'day') // เช็กว่า workDate ตรงกับวันที่เลือก
+      );
+    });
+  
+    form.setFieldsValue({
+      numberOfPeople: selectedSite?.numberOfPeople ?? 0,
+      workingPeople: selectedSite?.numberOfPeople ?? 0,
+      dailyWorkingEmployees: selectedSite?.dailyWorkingEmployees ?? 0,
+    });
   };
-
+  
  
   // ฟังก์ชันสำหรับคำนวณใหม่ทุกครั้งที่มีการเปลี่ยนแปลง
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -84,30 +94,33 @@ export default function RegisterForm() {
 
   // ฟังก์ชันเรียกใช้เมื่อกด Submit
   const onFinish = async (values: TFormValue) => {
-
-    console.log("Form Values:", values);
+    const selectedSite = siteData.find((i) => i.siteCode === values.siteCode);
+  
     const save = await createTimeSheet({
       date: values.date,
-      subsite: values.subSite,
+      subsite:selectedSite?.subSite ??"",
       siteCode: values.siteCode,
-      siteName: siteData.find((i) => i.siteCode === values.siteCode)?.siteName ?? "",
-      numberOfPeople: values.numberOfPeople?? 0,
-      dailyWorkingEmployees: 0,
-      workingPeople: values.workingPeople?? 0,
-      businessLeave: values.businessLeave?? 0,
-      sickLeave: values.sickLeave??0,
-      peopleLeave: values.peopleLeave?? 0,
-      overContractEmployee: values.overContractEmployee??0,
-      replacementEmployee: values.replacementEmployee??0,
-      replacementNames: values.replacementNames??[""],
-      remark: values.remark??[],
+      siteName: selectedSite?.siteName ?? "",
+      numberOfPeople: values.numberOfPeople ?? 0,
+      dailyWorkingEmployees: values.dailyWorkingEmployees ?? 0,
+      workingPeople: values.workingPeople ?? 0,
+      businessLeave: values.businessLeave ?? 0,
+      sickLeave: values.sickLeave ?? 0,
+      peopleLeave: values.peopleLeave ?? 0,
+      overContractEmployee: values.overContractEmployee ?? 0,
+      replacementEmployee: values.replacementEmployee ?? 0,
+      replacementNames: values.replacementNames ?? [""],
+      remark: typeof values.remark === "string" ? values.remark : "",
       nameadmin: "",
     });
+  
     if (save) {
       form.resetFields();
       alert("ลงทะเบียนสำเร็จ");
     }
   };
+  
+  
 
   // ปิดการแก้ไข DatePicker (disabled)
   const disabledDatePicker: DatePickerProps["disabledDate"] = () => true;

@@ -3,12 +3,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Table, Modal, Form, Input, InputNumber, Button, DatePicker, Popconfirm } from "antd";
-import { getAllSiteDayOff, addSiteDayOff, updateSiteDayOff, deleteSiteDayOff } from "./action";
+import {
+  Table,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Button,
+  DatePicker,
+  Popconfirm,
+} from "antd";
+import {
+  getAllSiteDayOff,
+  addSiteDayOff,
+  updateSiteDayOff,
+  deleteSiteDayOff,
+} from "./action";
 import dayjs from "dayjs";
 
 type SiteDayOff = {
-  id: number;
+  id:number;
   workDate: Date;
   subSite: string;
   siteCode: string;
@@ -35,23 +49,30 @@ export default function SiteDayOffPage() {
   }, []);
 
   const onFinish = async (values: SiteDayOff) => {
+    const payload = {
+      ...values,
+      workDate: values.workDate,
+      subSite: values.subSite,
+      siteCode: values.siteCode,
+      siteName: values.siteName,
+      typeSite: values.typeSite,
+      numberOfPeople: Number(values.numberOfPeople),
+      penaltyRate: Number(values.penaltyRate),
+      dailyWorkingEmployees: Number(values.dailyWorkingEmployees),
+    };
+
     if (editingRecord) {
-      await updateSiteDayOff(editingRecord.id, {
-        ...values,
-        workDate: values.workDate, // เพราะในฐานข้อมูลต้องเป็น Date จริง
-      });
+      await updateSiteDayOff(editingRecord.id, payload);
     } else {
-      await addSiteDayOff({
-        ...values,
-        workDate: values.workDate,
-      });
+      await addSiteDayOff(payload);
     }
+
     fetchData();
     form.resetFields();
     setEditingRecord(null);
     setOpenModal(false);
   };
-  
+
   const handleDelete = async (id: number) => {
     await deleteSiteDayOff(id);
     fetchData();
@@ -71,7 +92,12 @@ export default function SiteDayOffPage() {
         rowKey="id"
         scroll={{ x: "max-content" }}
         columns={[
-          { title: "วันที่ทำงาน", dataIndex: "workDate", render: (d) => dayjs(d).format("YYYY-MM-DD") },
+          {
+            title: "วันที่ทำงาน",
+            dataIndex: "workDate",
+            render: (date: Date) =>
+              date ? dayjs(date).format("YYYY-MM-DD") : "-",
+          },
           { title: "SubSite", dataIndex: "subSite" },
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
@@ -95,7 +121,10 @@ export default function SiteDayOffPage() {
                 >
                   แก้ไข
                 </Button>
-                <Popconfirm title="ยืนยันลบ?" onConfirm={() => handleDelete(record.id)}>
+                <Popconfirm
+                  title="ยืนยันลบ?"
+                  onConfirm={() => handleDelete(record.id)}
+                >
                   <Button danger>ลบ</Button>
                 </Popconfirm>
               </div>
@@ -116,28 +145,60 @@ export default function SiteDayOffPage() {
         width={600}
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item label="วันที่ทำงาน" name="workDate" rules={[{ required: true }]}>
+          <Form.Item
+            label="วันที่ทำงาน"
+            name="workDate"
+            rules={[{ required: true }]}
+          >
             <DatePicker className="w-full" />
           </Form.Item>
-          <Form.Item label="SubSite" name="subSite" rules={[{ required: true }]}>
+          <Form.Item
+            label="SubSite"
+            name="subSite"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="Site Code" name="siteCode" rules={[{ required: true }]}>
+          <Form.Item
+            label="Site Code"
+            name="siteCode"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="Site Name" name="siteName" rules={[{ required: true }]}>
+          <Form.Item
+            label="Site Name"
+            name="siteName"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="Type Site" name="typeSite" rules={[{ required: true }]}>
+          <Form.Item
+            label="Type Site"
+            name="typeSite"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="จำนวนคน" name="numberOfPeople" rules={[{ required: true }]}>
+          <Form.Item
+            label="จำนวนคน"
+            name="numberOfPeople"
+            rules={[{ required: true }]}
+          >
             <InputNumber className="w-full" min={1} />
           </Form.Item>
-          <Form.Item label="ค่าปรับ" name="penaltyRate" rules={[{ required: true }]}>
+          <Form.Item
+            label="ค่าปรับ"
+            name="penaltyRate"
+            rules={[{ required: true }]}
+          >
             <InputNumber className="w-full" min={0} />
           </Form.Item>
-          <Form.Item label="ทำงานจริง" name="dailyWorkingEmployees" rules={[{ required: true }]}>
+          <Form.Item
+            label="ทำงานจริง"
+            name="dailyWorkingEmployees"
+            rules={[{ required: true }]}
+          >
             <InputNumber className="w-full" min={0} />
           </Form.Item>
         </Form>
