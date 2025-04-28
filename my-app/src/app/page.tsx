@@ -1,17 +1,13 @@
 "use client";
 
 import { Card, Select, DatePicker, Button, Form, Input } from "antd";
+import { useRouter } from "next/navigation";
+
 import type { DatePickerProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import dayjs, { Dayjs } from "dayjs";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import {
-  createTimeSheet,
-  getAllSiteData,
-  getDailyWorkingPeople,
-  ISite,
-} from "./action";
+import { createTimeSheet, getAllSiteData, ISite } from "./action";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
@@ -48,20 +44,22 @@ export default function RegisterForm() {
     setSiteData(site);
   };
 
-  const onSitechange = (value: string) => {
+  const onSitechange = (subSite: string) => {
     const selectedDate = form.getFieldValue("date"); // ดึงวันที่ที่เลือกในฟอร์ม
     const selectedSite = siteData.find((SiteDayOff) => {
       return (
-        SiteDayOff.siteCode === value &&
-        dayjs(SiteDayOff.workDate).isSame(selectedDate, "day") // เช็กว่า workDate ตรงกับวันที่เลือก
+        SiteDayOff.subSite === subSite &&  // ใช้ subSite ตรงๆ
+        dayjs(SiteDayOff.workDate).isSame(selectedDate, "day")
       );
     });
-
+  
     form.setFieldsValue({
       numberOfPeople: selectedSite?.numberOfPeople ?? 0,
       workingPeople: selectedSite?.dailyWorkingEmployees ?? 0,
+      siteName: selectedSite?.siteName ?? "", // ✅ ใส่ siteName ด้วย
     });
   };
+  
 
   // กำหนดวันที่เป็นวันนี้ และไม่ให้แก้ไข
   const dateFormat = "DD-MM-YYYY";
@@ -80,13 +78,19 @@ export default function RegisterForm() {
   };
 
   // ฟังก์ชันเรียกใช้เมื่อกด Submit
-  const onFinish = async (values: TFormValue) => {
-    const selectedSite = siteData.find((i) => i.siteCode === values.siteCode);
+  const router = useRouter();
 
-    const save = await createTimeSheet({
+  const onFinish = async (values: TFormValue) => {
+    const selectedDate = values.date;
+    const selectedSite = siteData.find((i) => 
+      i.subSite === values.subSite &&
+      dayjs(i.workDate).isSame(selectedDate, "day")
+    );
+  
+    const dataToSend = {
       date: values.date,
-      subsite: selectedSite?.subSite ?? "",
-      siteCode: values.siteCode,
+      subSite: selectedSite?.subSite ?? "",
+      siteCode: selectedSite?.siteCode ?? "",
       siteName: selectedSite?.siteName ?? "",
       numberOfPeople: Number(values.numberOfPeople) ?? 0,
       dailyWorkingEmployees: Number(values.dailyWorkingEmployees) ?? 0,
@@ -96,18 +100,19 @@ export default function RegisterForm() {
       peopleLeave: Number(values.peopleLeave) ?? 0,
       overContractEmployee: Number(values.overContractEmployee) ?? 0,
       replacementEmployee: Number(values.replacementEmployee) ?? 0,
-
       replacementNames: values.replacementNames ?? [""],
       remark: typeof values.remark === "string" ? values.remark : "",
       nameadmin: "",
-    });
-
+    };
+    
+    const save = await createTimeSheet(dataToSend);
+  
     if (save) {
       form.resetFields();
-      alert("ลงทะเบียนสำเร็จ");
+      router.push(`/summary?data=${encodeURIComponent(JSON.stringify(dataToSend))}`);
     }
   };
-
+  
   // ปิดการแก้ไข DatePicker (disabled)
   const disabledDatePicker: DatePickerProps["disabledDate"] = () => true;
 
@@ -127,9 +132,9 @@ export default function RegisterForm() {
         >
           {/* Select Site */}
           <Form.Item
-            name="siteCode"
+            name="subSite" // ✅ ใช้ subSite เป็น value
             label="กรุณาเลือก Site"
-            rules={[{ required: true, message: "กรุณาเลือก Site" }]} //กฏที่เราต้องการให้ทำ
+            rules={[{ required: true, message: "กรุณาเลือก Site" }]}
           >
             <Select placeholder="เลือก Site" onChange={onSitechange}>
               {siteData.map((SiteDayOff) => (

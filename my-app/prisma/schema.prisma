@@ -16,25 +16,28 @@ datasource db {
 model LMTimesheetRecords {
   id                    Int        @id @unique @default(autoincrement())
   date                  DateTime   @default(now()) // วันที่บันทึก
-  subSite               String
+  subSite               String     // ✅ ชื่อ field จริง
   siteCode              String
   siteName              String
-  numberOfPeople        Int // จำนวนคนตามสัญญา
-  dailyWorkingEmployees Int //ตามวันที่กำนดมา
-  workingPeople         Int //กรอกเองจำนวนที่ไปทำงาน
+  numberOfPeople        Int
+  dailyWorkingEmployees Int
+  workingPeople         Int
   businessLeave         Int
   sickLeave             Int
   peopleLeave           Int
-  overContractEmployee  Int //เกินสัญญา
+  overContractEmployee  Int
   replacementEmployee   Int
   replacementNames      String[]
   remark                String
   nameadmin             String
   createdAt             DateTime   @default(now())
   updateAt              DateTime   @updatedAt
-  // สร้างความสัมพันธ์กับ Site
-  site                  Site      @relation(fields: [siteCode], references: [siteCode])
+
+  // ความสัมพันธ์
+   site                  Site ?      @relation(fields: [siteCode], references: [siteCode])
+  siteDayOff            SiteDayOff? @relation("SiteDayOffToTimesheet", fields: [subSite], references: [subSite])
 }
+
 
 model Site {
   id                 Int               @id @unique @default(autoincrement())
@@ -65,5 +68,6 @@ model SiteDayOff {
   penaltyRate           Int //ค่าปรับ
   dailyWorkingEmployees Int
   site                  Site                 @relation(fields: [siteCode], references: [siteCode])
+  LMTimesheetRecords    LMTimesheetRecords[] @relation("SiteDayOffToTimesheet")
   
-}
+  }

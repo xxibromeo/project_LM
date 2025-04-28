@@ -3,13 +3,13 @@ import { PrismaClient, SiteDayOff } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-type TFormValue = {
+export type TFormValue = {
   date: Date;
-  subsite:string;
+  subSite: string;
   siteName: string;
   siteCode: string;
   numberOfPeople: number;
-  dailyWorkingEmployees:number;
+  dailyWorkingEmployees: number;
   workingPeople: number;
   businessLeave: number;
   sickLeave: number;
@@ -18,8 +18,7 @@ type TFormValue = {
   replacementEmployee: number;
   replacementNames: string[];
   remark: string;
-  nameadmin: string; 
-
+  nameadmin: string;
 
 };
 export type ISite = SiteDayOff;
@@ -28,33 +27,33 @@ export const getAllSiteData = async () => await prisma.siteDayOff.findMany();
 
 export const createTimeSheet = async (data: TFormValue) => {
   try {
-    // ตรวจสอบว่าฟิลด์สำคัญมีค่าหรือไม่
     if (!data.siteCode || !data.date) {
       console.log(data);
       console.error("Required fields are missing.");
-      return null; // ถ้าขาดฟิลด์สำคัญจะไม่บันทึก
+      return null;
     }
 
-    // บันทึกข้อมูลลงใน Prisma
     const result = await prisma.lMTimesheetRecords.create({
       data: {
         date: data.date,
-        subSite:data.subsite,
+        subSite: data.subSite,
         siteCode: data.siteCode,
-        siteName: data.siteName, // ตั้งค่า default เป็น "" ถ้าค่าหาย
-        numberOfPeople: data.numberOfPeople || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        dailyWorkingEmployees:data.dailyWorkingEmployees||0,
-        businessLeave: data.businessLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        workingPeople: data.workingPeople || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        sickLeave: data.sickLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        peopleLeave: data.peopleLeave || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        overContractEmployee: data.overContractEmployee || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        replacementEmployee: data.replacementEmployee || 0, // ตั้งค่า default เป็น 0 ถ้าค่าหาย
-        remark: data.remark || "", // ตั้งค่า default เป็น "" ถ้าค่าหาย
-        nameadmin: data.nameadmin ?? "ไม่พบชื่อ", // เพิ่มมา
-        replacementNames:data.replacementNames??[""],
+        siteName: data.siteName ?? "",
+        numberOfPeople: data.numberOfPeople ?? 0,
+        dailyWorkingEmployees: data.dailyWorkingEmployees ?? 0,
+        businessLeave: isNaN(data.businessLeave) ? 0 : data.businessLeave,
+        workingPeople: data.workingPeople ?? 0,
+        sickLeave: isNaN(data.sickLeave) ? 0 : data.sickLeave,
+        peopleLeave: isNaN(data.peopleLeave) ? 0 : data.peopleLeave,
+        overContractEmployee: isNaN(data.overContractEmployee) ? 0 : data.overContractEmployee,
+        replacementEmployee: data.replacementEmployee ?? 0,
+        replacementNames: data.replacementNames ?? [""],
+        remark: data.remark ?? "",
+        nameadmin: data.nameadmin ?? "ไม่พบชื่อ",
       },
     });
+    
+  
 
     if (result) {
       return true;
@@ -62,7 +61,7 @@ export const createTimeSheet = async (data: TFormValue) => {
     return null;
   } catch (error) {
     console.error("Error creating timesheet:", error);
-    return null; // หากเกิดข้อผิดพลาดจาก Prisma จะ return null
+    return null;
   }
 };
 
