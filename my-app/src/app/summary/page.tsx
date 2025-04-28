@@ -31,8 +31,17 @@ export default function SummaryPage() {
   };
 
   const formatValue = (
-    value: string | number | string[] | null | undefined
+    value: string | number | string[] | null | undefined,
+    key?: string // ✨ เพิ่ม key มาด้วย
   ) => {
+    if (key === "date" && typeof value === "string") {
+      const date = new Date(value);
+      return date.toLocaleDateString("th-TH", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    }
     if (Array.isArray(value)) return value.join(", ");
     if (value === null || value === undefined || value === "") return "-";
     return value;
@@ -40,7 +49,9 @@ export default function SummaryPage() {
 
   const goToEditPage = () => {
     if (parsedData) {
-      router.push(`/edit?data=${encodeURIComponent(JSON.stringify(parsedData))}`);
+      router.push(
+        `/summary/edit?data=${encodeURIComponent(JSON.stringify(parsedData))}`
+      );
     }
   };
 
@@ -48,12 +59,7 @@ export default function SummaryPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <Card className="w-full max-w-3xl">
         <div className="flex flex-col items-center mb-6">
-          <Image
-            src="/logo-SO.webp"
-            alt="Logo"
-            width={64}
-            height={64}
-          />
+          <Image src="/logo-SO.webp" alt="Logo" width={64} height={64} />
           <h1 className="text-2xl font-bold text-[#E30613] mt-4">
             สรุปข้อมูลที่บันทึกแล้ว
           </h1>
@@ -70,7 +76,8 @@ export default function SummaryPage() {
                   </p>
                   <p className="text-black text-base">
                     {formatValue(
-                      value as string | number | string[] | null | undefined
+                      value as string | number | string[] | null | undefined,
+                      key // ✨ ส่ง key เข้าไป
                     )}
                   </p>
                 </div>
@@ -95,6 +102,7 @@ export default function SummaryPage() {
             type="primary"
             size="large"
             className="bg-[#E30613] text-white border-none"
+            onClick={() => router.push("/")}
           >
             ยืนยันข้อมูล
           </Button>

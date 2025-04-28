@@ -266,7 +266,7 @@ export default function RegisterForm() {
 
           {/*หมายเหตุ*/}
           <Form.Item name="remark" label="หมายเหตุ">
-            <TextArea rows={4} placeholder="หมายเหตุ" maxLength={6} />
+            <TextArea rows={4} placeholder="หมายเหตุ" maxLength={200} />
           </Form.Item>
 
           <Form.Item>
