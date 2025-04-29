@@ -1,9 +1,9 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; // ดึง Prisma Client
+import { prisma } from "@/lib/prisma"; // สมมติคุณมี prisma instance ที่เชื่อมฐานข้อมูลไว้
+import type { TimesheetData } from "./types"; // ✅
 
-// Update ข้อมูล Timesheet
-export async function updateTimesheet(id: number, data: any) {
+export async function updateTimesheet(id: number, data: Partial<TimesheetData>) {
   try {
     const updated = await prisma.lMTimesheetRecords.update({
       where: { id },
@@ -24,6 +24,18 @@ export async function updateTimesheet(id: number, data: any) {
     return updated;
   } catch (error) {
     console.error("Error updating timesheet:", error);
+    return null;
+  }
+}
+
+export async function getTimesheetById(id: number) {
+  try {
+    const data = await prisma.lMTimesheetRecords.findUnique({
+      where: { id },
+    });
+    return data;
+  } catch (error) {
+    console.error("Error getting timesheet:", error);
     return null;
   }
 }

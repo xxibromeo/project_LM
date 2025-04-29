@@ -265,11 +265,11 @@ export default function RegisterForm() {
               <Form.Item
                 key={index}
                 name={["replacementNames", index]}
-                label={`ชื่อคนแทนงาน ${index + 1}`}
-                rules={replacementCount > 0 ? [{ required: true, message: "กรุณากรอกชื่อคนแทนงาน" }] : []}
+                label={`ชื่อ-สกุล คนแทนงานคนที่ ${index + 1}`}
+                rules={replacementCount > 0 ? [{ required: true, message: "ชื่อ-สกุล คนแทนงาน" }] : []}
               >
                 <Input
-                  placeholder={`กรอกชื่อคนแทนงาน ${index + 1}`}
+                  placeholder={`ชื่อ-สกุล คนแทนงานคนที่ ${index + 1}`}
                   size="large"
                   className="w-full"
                 />

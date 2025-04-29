@@ -1,34 +1,69 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Card, Form, Input, InputNumber, Button, Divider } from "antd";
+import { Card, Form, Input, InputNumber, Button, Divider, message } from "antd";
 import Image from "next/image";
-import dayjs from "dayjs";
-import "dayjs/locale/th";
-import {  useState } from "react";
+import { useState, useEffect } from "react";
+import { updateTimesheet } from "../action";
 
-dayjs.locale("th");
-
-type FormValues = { [key: string]: unknown };
+type TimesheetData = {
+  id: number;
+  siteName: string;
+  numberOfPeople: number;
+  dailyWorkingEmployees: number;
+  workingPeople: number;
+  businessLeave: number;
+  sickLeave: number;
+  peopleLeave: number;
+  overContractEmployee: number;
+  replacementEmployee: number;
+  replacementNames: string[];
+  remark?: string;
+};
 
 export default function EditPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const dataString = searchParams.get("data");
 
-  const parsedData = dataString ? JSON.parse(decodeURIComponent(dataString)) : null;
+  const parsedData: TimesheetData | null = dataString
+    ? JSON.parse(decodeURIComponent(dataString))
+    : null;
 
-  const [form] = Form.useForm();
-  const [replacementNames, setReplacementNames] = useState<string[]>(parsedData?.replacementNames || []);
+  const [form] = Form.useForm<TimesheetData>();
+  const [replacementNames, setReplacementNames] = useState<string[]>(
+    parsedData?.replacementNames?.length ? parsedData.replacementNames : []
+  );
 
-  const onFinish = (values: FormValues) => {
-    const updatedData = { ...parsedData, ...values, replacementNames };
-    router.push(`/summary?data=${encodeURIComponent(JSON.stringify(updatedData))}`);
+  useEffect(() => {
+    if (parsedData) {
+      form.setFieldsValue({
+        ...parsedData,
+        replacementEmployee: replacementNames.length,
+      });
+    }
+  }, [parsedData, form, replacementNames.length]);
+
+  const onFinish = async (values: TimesheetData) => {
+    if (!parsedData?.id) {
+      message.error("ไม่พบ ID ของ Timesheet");
+      return;
+    }
+
+    const updatedData = {
+      ...values,
+      replacementNames: replacementNames.filter((name) => name.trim() !== ""),
+    };
+
+    const result = await updateTimesheet(parsedData.id, updatedData);
+
+    if (result) {
+      message.success("อัปเดตข้อมูลเรียบร้อย");
+      router.push(`/summary?id=${parsedData.id}`);
+    } else {
+      message.error("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+    }
   };
-
-  const formattedDate = parsedData?.date
-    ? dayjs(parsedData.date).add(543, "year").format("D MMM YYYY")
-    : "";
 
   const onReplacementEmployeeChange = (value: number | null) => {
     if (value === null || value < 0) return;
@@ -60,17 +95,14 @@ export default function EditPage() {
           <Form
             form={form}
             layout="vertical"
+            onFinish={onFinish}
             initialValues={{
               ...parsedData,
               replacementEmployee: replacementNames.length,
             }}
-            onFinish={onFinish}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-              <Form.Item label="วันที่">
-                <Input value={formattedDate} disabled />
-              </Form.Item>
-
+              {/* ข้อมูลทั่วไป */}
               <Form.Item label="ชื่อไซต์" name="siteName">
                 <Input disabled />
               </Form.Item>
@@ -87,6 +119,7 @@ export default function EditPage() {
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
 
+              {/* สถิติการลา */}
               <Form.Item label="ลากิจ" name="businessLeave">
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
@@ -103,6 +136,7 @@ export default function EditPage() {
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
 
+              {/* คนแทนงาน */}
               <Form.Item label="จำนวนคนแทนงาน" name="replacementEmployee">
                 <InputNumber
                   className="w-full"
@@ -111,24 +145,31 @@ export default function EditPage() {
                 />
               </Form.Item>
 
-              {replacementNames.map((name, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <Form.Item
-                    label={`ชื่อคนแทนงาน ${index + 1}`}
-                    name={['replacementNames', index]}
-                    className="flex-1"
-                    rules={[{ required: true, message: 'กรุณากรอกชื่อคนแทนงาน' }]}
-                  >
-                    <Input value={name} onChange={(e) => {
-                      const updated = [...replacementNames];
-                      updated[index] = e.target.value;
-                      setReplacementNames(updated);
-                    }} />
-                  </Form.Item>
-                  <Button danger onClick={() => removeReplacementName(index)}>ลบ</Button>
-                </div>
-              ))}
+              {/* ชื่อคนแทนงาน */}
+              {replacementNames.length > 0 &&
+                replacementNames.map((name, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Form.Item
+                      label={`ชื่อคนแทนงาน ${index + 1}`}
+                      name={['replacementNames', index]}
+                      className="flex-1"
+                      rules={[{ required: true, message: 'กรุณากรอกชื่อคนแทนงาน' }]}
+                    >
+                      <Input
+                        value={name}
+                        onChange={(e) => {
+                          const updated = [...replacementNames];
+                          updated[index] = e.target.value;
+                          setReplacementNames(updated);
+                        }}
+                      />
+                    </Form.Item>
+                    <Button danger onClick={() => removeReplacementName(index)}>ลบ</Button>
+                  </div>
+                ))
+              }
 
+              {/* หมายเหตุ */}
               <Form.Item label="หมายเหตุ" name="remark" className="col-span-2">
                 <Input />
               </Form.Item>

@@ -9,9 +9,7 @@ export default function SummaryPage() {
   const router = useRouter();
   const dataString = searchParams.get("data");
 
-  const parsedData = dataString
-    ? JSON.parse(decodeURIComponent(dataString))
-    : null;
+  const parsedData = dataString ? JSON.parse(decodeURIComponent(dataString)) : null;
 
   const fieldMapping: { [key: string]: string } = {
     date: "วันที่",
@@ -21,97 +19,68 @@ export default function SummaryPage() {
     numberOfPeople: "จำนวนพนักงานตามสัญญา",
     dailyWorkingEmployees: "พนักงานประจำที่มาทำงาน",
     workingPeople: "พนักงานที่ทำงานจริง",
-    businessLeave: "ลากิจ",
-    sickLeave: "ลาป่วย",
-    peopleLeave: "ขาดงาน",
+    businessLeave: "ลากิจ (พนักงานประจำ)",
+    sickLeave: "ลาป่วย (พนักงานประจำ)",
+    peopleLeave: "ขาดงาน (พนักงานประจำ)",
     overContractEmployee: "พนักงานเกินสัญญา",
     replacementEmployee: "จำนวนคนแทนงาน",
     replacementNames: "ชื่อคนแทนงาน",
     remark: "หมายเหตุ",
   };
 
-  const formatValue = (
-    value: string | number | string[] | null | undefined,
-    key?: string
-  ) => {
-    if (key === "date" && typeof value === "string") {
-      const date = new Date(value);
-      return date.toLocaleDateString("th-TH", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+  const formatValue = (val: any, key?: string) => {
+    if (key === "date") {
+      const date = new Date(val);
+      return date.toLocaleDateString("th-TH");
     }
-    if (Array.isArray(value)) {
-      // 🔥 เช็กถ้าเป็น replacementNames ให้ใส่ลำดับด้วย
-      if (key === "replacementNames") {
-        return value.map((name, index) => `${index + 1}. ${name}`).join("\n ");
-      }
-      return value.join("\n ");
+    if (Array.isArray(val)) {
+      const clean = val.filter((v) => v && v.trim() !== "");
+      return clean.length > 0 ? clean.map((v, i) => `${i + 1}. ${v}`).join("\n") : "-";
     }
-    if (value === null || value === undefined || value === "") return "-";
-    return value;
+    if (val === null || val === undefined || val === "") return "-";
+    return val;
   };
-  
 
-  const goToEditPage = () => {
-    if (parsedData) {
-      router.push(
-        `/summary/edit?data=${encodeURIComponent(JSON.stringify(parsedData))}`
-      );
-    }
-  };
+  if (!parsedData) {
+    return <p className="text-center">ไม่พบข้อมูล</p>;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <Card className="w-full max-w-3xl">
         <div className="flex flex-col items-center mb-6">
           <Image src="/logo-SO.webp" alt="Logo" width={64} height={64} />
-          <h1 className="text-2xl font-bold text-[#E30613] mt-4">
-            สรุปข้อมูลที่บันทึกแล้ว
-          </h1>
+          <h1 className="text-2xl font-bold text-[#E30613] mt-4">สรุปข้อมูลที่บันทึกแล้ว</h1>
         </div>
 
-        {parsedData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            {Object.entries(parsedData)
-              .filter(([key]) => key !== "nameadmin")
-              .map(([key, value]) => (
-                <div key={key}>
-                  <p className="text-[#E30613] font-semibold text-base">
-                    {fieldMapping[key] ?? key}
-                  </p>
-                  <p className="text-black text-base whitespace-pre-line">
-                    {formatValue(
-                      value as string | number | string[] | null | undefined,
-                      key // ✨ ส่ง key เข้าไป
-                    )}
-                  </p>
-                </div>
-              ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">ไม่พบข้อมูล</p>
-        )}
+        {/* 📝 แสดงข้อมูล */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+          {Object.entries(parsedData)
+            .filter(([k]) => k !== "nameadmin")
+            .map(([k, v]) => (
+              <div key={k}>
+                <p className="text-[#E30613] font-semibold">{fieldMapping[k] ?? k}</p>
+                <p className="text-black whitespace-pre-line">{formatValue(v, k)}</p>
+              </div>
+            ))}
+        </div>
 
         <Divider className="my-10" />
 
         <div className="flex justify-center gap-6">
           <Button
             type="default"
-            size="large"
-            className="border-[#E30613] text-[#E30613]"
-            onClick={goToEditPage}
+            onClick={() =>
+              router.push(`/summary/edit?data=${encodeURIComponent(JSON.stringify(parsedData))}`)
+            }
           >
             แก้ไขข้อมูล
           </Button>
           <Button
             type="primary"
-            size="large"
-            className="bg-[#E30613] text-white border-none"
             onClick={() => router.push("/")}
           >
-            ยืนยันข้อมูล
+            กลับหน้าหลัก
           </Button>
         </div>
       </Card>

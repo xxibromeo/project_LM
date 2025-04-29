@@ -46,7 +46,7 @@ export const createTimeSheet = async (data: TFormValue) => {
         sickLeave: isNaN(data.sickLeave) ? 0 : data.sickLeave,
         peopleLeave: isNaN(data.peopleLeave) ? 0 : data.peopleLeave,
         overContractEmployee: isNaN(data.overContractEmployee) ? 0 : data.overContractEmployee,
-        replacementEmployee: data.replacementEmployee ?? 0,
+        replacementEmployee: isNaN(data.replacementEmployee) ? 0 : data.replacementEmployee,
         replacementNames: data.replacementNames ?? [""],
         remark: data.remark ?? "",
         nameadmin: data.nameadmin ?? "ไม่พบชื่อ",
