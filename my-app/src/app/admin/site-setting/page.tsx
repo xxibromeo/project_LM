@@ -99,7 +99,11 @@ export default function SiteManagementPage() {
             title: "subSite",
             dataIndex: "subSite",
             render: (text: string) => (
-              <Tooltip title={"ให้เพิ่ม _ตามด้วยเลข _1 เช่น subsite=>66LML0011_1  = NMT - งานสวน กม.21 "}>
+              <Tooltip
+                title={
+                  "ให้เพิ่ม _ตามด้วยเลข _1 เช่น subsite=>66LML0011_1  = NMT - งานสวน กม.21 "
+                }
+              >
                 <span>{text}</span>
               </Tooltip>
             ),
@@ -165,7 +169,13 @@ export default function SiteManagementPage() {
           <Form.Item
             label="subSite"
             name="subSite"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: "กรุณากรอก subSite" },
+              {
+                pattern: /^\S+$/, // ไม่มีเว้นวรรค
+                message: "ห้ามมีเว้นวรรคใน subSite",
+              },
+            ]}
           >
             <Input />
           </Form.Item>

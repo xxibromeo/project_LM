@@ -181,9 +181,9 @@ export default function TimesheetPage() {
                 <Form.Item
                   name={["replacementNames", index]}
                   noStyle
-                  rules={[{ required: true, message: "กรุณากรอกชื่อคนแทนงาน" }]}
+                  rules={[{ required: true, message: "กรุณากรอกชื่อ-สกุลคนแทนงาน" }]}
                 >
-                  <Input className="w-full" />
+                  <Input className="w-full" placeholder="กรุณากรอกชื่อ-สกุลคนแทนงาน"/>
                 </Form.Item>
                 <Button
                   danger
