@@ -14,17 +14,16 @@ type Site = {
   id: number;
   siteCode: string;
   siteName: string;
-  subSite:string;
+  subSite: string;
   clientName: string | null;
   startDate: Date;
   endDate: Date;
   numberOfPeople: number | null;
-  penaltyRate: number| null;
-  typeSite: string| null;
-  adminWage: string| null;
-  siteSupervisorName: string|null;
+  penaltyRate: number | null;
+  typeSite: string | null;
+  adminWage: string | null;
+  siteSupervisorName: string | null;
   status: string | null;
-
 };
 
 export default function SiteManagementPage() {
@@ -49,31 +48,30 @@ export default function SiteManagementPage() {
       startDate: values.startDate ? values.startDate.toDate() : undefined,
       endDate: values.endDate ? values.endDate.toDate() : undefined,
       numberOfPeople: parseInt(values.numberOfPeople, 10) || 0,
-      penaltyRate: values.penaltyRate !== undefined && values.penaltyRate !== ""
-        ? parseInt(values.penaltyRate, 10)
-        : null,
+      penaltyRate:
+        values.penaltyRate !== undefined && values.penaltyRate !== ""
+          ? parseInt(values.penaltyRate, 10)
+          : null,
     };
-    
-  
+
     // ตรวจสอบว่า status ถูกส่งมาด้วย
-    console.log('status:', payload.status); // ตรวจสอบค่า status
-  
+    console.log("status:", payload.status); // ตรวจสอบค่า status
+
     if (!editingSite) {
       delete payload.id; // ลบ id ตอนเพิ่ม
     }
-  
+
     if (editingSite) {
       await updateSite(editingSite.id, payload); // ส่งข้อมูลที่แก้ไขไป
     } else {
       await addSite(payload); // ส่งข้อมูลใหม่ไป
     }
-  
+
     fetchSites();
     form.resetFields();
     setEditingSite(null);
     setOpenModal(false);
   };
-  
 
   return (
     <div className="p-6">
@@ -88,6 +86,7 @@ export default function SiteManagementPage() {
         dataSource={sites}
         rowKey="id"
         columns={[
+          { title: "subSite", dataIndex: "subSite" },
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
           { title: "ชื่อลูกค้า", dataIndex: "clientName" },
@@ -147,6 +146,14 @@ export default function SiteManagementPage() {
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <Form.Item
+            label="subSite"
+            name="subSite"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
             label="Site Code"
             name="siteCode"
             rules={[{ required: true }]}
@@ -197,7 +204,9 @@ export default function SiteManagementPage() {
 
           <Form.Item label="ประเภทการชดเชย" name="typeSite">
             <Select placeholder="เลือกประเภทการชดเชย">
-              <Select.Option value="ชดเชยรายเดือน ">ชดเชยรายเดือน</Select.Option>
+              <Select.Option value="ชดเชยรายเดือน ">
+                ชดเชยรายเดือน
+              </Select.Option>
               <Select.Option value="ชดเชยรายวัน">ชดเชยรายวัน</Select.Option>
             </Select>
           </Form.Item>
