@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs"; // เพิ่ม import นี้ที่หัวไฟล์ด้วย
 
-import { Table, Modal, Form, Input, Button, DatePicker, Select } from "antd";
+import {
+  Table,
+  Modal,
+  Form,
+  Input,
+  Button,
+  DatePicker,
+  Select,
+  Tooltip,
+} from "antd";
 import {
   getAllSites,
   addSite,
@@ -86,7 +95,15 @@ export default function SiteManagementPage() {
         dataSource={sites}
         rowKey="id"
         columns={[
-          { title: "subSite", dataIndex: "subSite" },
+          {
+            title: "subSite",
+            dataIndex: "subSite",
+            render: (text: string) => (
+              <Tooltip title={"ให้เพิ่ม _ตามด้วยเลข _1 เช่น subsite=>66LML0011_1  = NMT - งานสวน กม.21 "}>
+                <span>{text}</span>
+              </Tooltip>
+            ),
+          },
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
           { title: "ชื่อลูกค้า", dataIndex: "clientName" },
