@@ -4,9 +4,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Card, Form, Input, InputNumber, Button, Divider, message } from "antd";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { updateTimesheet } from "../action";
+import { updateTimesheet } from "../action";  // นำเข้า updateTimesheet
 
-type TimesheetData = {
+export type TimesheetData = {
   id: number;
   siteName: string;
   numberOfPeople: number;
@@ -26,13 +26,14 @@ export default function EditPage() {
   const router = useRouter();
   const dataString = searchParams.get("data");
 
-  const parsedData: TimesheetData | null = dataString
-    ? JSON.parse(decodeURIComponent(dataString))
-    : null;
+  // ตรวจสอบค่าของ parsedData
+  const parsedData: TimesheetData | null = dataString ? JSON.parse(decodeURIComponent(dataString)) : null;
+  
+  console.log(parsedData);  // ตรวจสอบค่า parsedData
 
   const [form] = Form.useForm<TimesheetData>();
-  const [replacementNames, setReplacementNames] = useState<string[]>(
-    parsedData?.replacementNames?.length ? parsedData.replacementNames : []
+  const [replacementNames, setReplacementNames] = useState<string[]>( 
+    parsedData?.replacementEmployee && parsedData.replacementEmployee > 0 ? parsedData.replacementNames ?? [] : []
   );
 
   useEffect(() => {
@@ -50,18 +51,22 @@ export default function EditPage() {
       return;
     }
 
-    const updatedData = {
+    const updatedData: Partial<TimesheetData> = {
       ...values,
       replacementNames: replacementNames.filter((name) => name.trim() !== ""),
     };
 
+    console.log("Data to be updated:", updatedData);  // ตรวจสอบข้อมูลที่อัปเดต
+
     const result = await updateTimesheet(parsedData.id, updatedData);
 
+    console.log(result);  // ตรวจสอบผลลัพธ์ที่ได้จาก Prisma
+
     if (result) {
-      message.success("อัปเดตข้อมูลเรียบร้อย");
+      message.success("บันทึกข้อมูลสำเร็จ");
       router.push(`/summary?id=${parsedData.id}`);
     } else {
-      message.error("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+      message.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
 
@@ -70,17 +75,17 @@ export default function EditPage() {
     const current = [...replacementNames];
     if (value > current.length) {
       setReplacementNames([...current, ...Array(value - current.length).fill("")]);
-    } else if (value < current.length) {
+    } else {
       setReplacementNames(current.slice(0, value));
     }
     form.setFieldsValue({ replacementEmployee: value });
   };
 
   const removeReplacementName = (index: number) => {
-    const newList = [...replacementNames];
-    newList.splice(index, 1);
-    setReplacementNames(newList);
-    form.setFieldsValue({ replacementEmployee: newList.length });
+    const updated = [...replacementNames];
+    updated.splice(index, 1);
+    setReplacementNames(updated);
+    form.setFieldsValue({ replacementEmployee: updated.length });
   };
 
   return (
@@ -92,87 +97,65 @@ export default function EditPage() {
         </div>
 
         {parsedData ? (
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinish}
-            initialValues={{
-              ...parsedData,
-              replacementEmployee: replacementNames.length,
-            }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-              {/* ข้อมูลทั่วไป */}
+          <Form form={form} layout="vertical" onFinish={onFinish}>
+            <div className="space-y-4">
               <Form.Item label="ชื่อไซต์" name="siteName">
                 <Input disabled />
               </Form.Item>
 
-              <Form.Item label="จำนวนพนักงานตามสัญญา" name="numberOfPeople">
+              <Form.Item label="พนักงานตามสัญญา" name="numberOfPeople">
                 <InputNumber disabled className="w-full" />
               </Form.Item>
 
-              <Form.Item label="พนักงานประจำที่มาทำงาน" name="dailyWorkingEmployees">
+              <Form.Item label="พนักงานปรนะจำที่มาทำงาน" name="workingPeople">
+                <InputNumber className="w-full" min={0} disabled />
+              </Form.Item>
+
+              <Form.Item label="พนักงานประจำ(ที่มาทำงาน)" name="dailyWorkingEmployees">
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
 
-              <Form.Item label="พนักงานที่ทำงานจริง" name="workingPeople">
+              <Form.Item label="ลากิจ (พนักงานประจำ)" name="businessLeave">
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
 
-              {/* สถิติการลา */}
-              <Form.Item label="ลากิจ" name="businessLeave">
+              <Form.Item label="ลาป่วย (พนักงานประจำ)" name="sickLeave">
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
 
-              <Form.Item label="ลาป่วย" name="sickLeave">
-                <InputNumber className="w-full" min={0} />
-              </Form.Item>
-
-              <Form.Item label="ขาดงาน" name="peopleLeave">
+              <Form.Item label="ขาดงาน (พนักงานประจำ)" name="peopleLeave">
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
 
               <Form.Item label="พนักงานเกินสัญญา" name="overContractEmployee">
-                <InputNumber className="w-full" min={0} />
+                <InputNumber className="w-full" min={0}  defaultValue={0}/>
               </Form.Item>
 
               {/* คนแทนงาน */}
               <Form.Item label="จำนวนคนแทนงาน" name="replacementEmployee">
-                <InputNumber
-                  className="w-full"
-                  min={0}
-                  onChange={onReplacementEmployeeChange}
-                />
+                <InputNumber className="w-full" min={0} onChange={onReplacementEmployeeChange} />
               </Form.Item>
 
               {/* ชื่อคนแทนงาน */}
               {replacementNames.length > 0 &&
                 replacementNames.map((name, index) => (
                   <div key={index} className="flex gap-2 items-center">
-                    <Form.Item
-                      label={`ชื่อคนแทนงาน ${index + 1}`}
-                      name={['replacementNames', index]}
-                      className="flex-1"
-                      rules={[{ required: true, message: 'กรุณากรอกชื่อคนแทนงาน' }]}
-                    >
-                      <Input
-                        value={name}
-                        onChange={(e) => {
-                          const updated = [...replacementNames];
-                          updated[index] = e.target.value;
-                          setReplacementNames(updated);
-                        }}
-                      />
+                    <Form.Item label={`ชื่อคนแทนงาน ${index + 1}`} name={['replacementNames', index]} className="flex-1">
+                      <Input value={name} onChange={(e) => {
+                        const updated = [...replacementNames];
+                        updated[index] = e.target.value;
+                        setReplacementNames(updated);
+                      }} />
                     </Form.Item>
                     <Button danger onClick={() => removeReplacementName(index)}>ลบ</Button>
                   </div>
                 ))
               }
 
-              {/* หมายเหตุ */}
-              <Form.Item label="หมายเหตุ" name="remark" className="col-span-2">
+              <Form.Item label="หมายเหตุ" name="remark">
                 <Input />
               </Form.Item>
+
             </div>
 
             <Divider className="my-8" />

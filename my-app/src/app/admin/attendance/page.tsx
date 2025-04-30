@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Table,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Button,
-  DatePicker,
-} from "antd";
+import { Table, Modal, Form, Input, Button, DatePicker } from "antd";
 import {
   getAllTimesheets,
   updateTimesheet,
@@ -20,9 +12,8 @@ import dayjs from "dayjs";
 export default function TimesheetPage() {
   const [timesheets, setTimesheets] = useState<ILMTimesheetRecords[]>([]);
   const [openModal, setOpenModal] = useState(false);
-  const [editingData, setEditingData] = useState<ILMTimesheetRecords | null>(
-    null
-  );
+  const [editingData, setEditingData] = useState<ILMTimesheetRecords | null>(null);
+  const [replacementCount, setReplacementCount] = useState(0);
   const [form] = Form.useForm();
 
   const fetchData = async () => {
@@ -34,20 +25,42 @@ export default function TimesheetPage() {
     fetchData();
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useEffect(() => {
+    if (editingData) {
+      setReplacementCount(editingData.replacementEmployee || 0);
+      form.setFieldsValue({
+        ...editingData,
+        date: dayjs(editingData.date),
+      });
+    }
+  }, [editingData, form]);
+
   const onFinish = async (values: any) => {
     if (editingData) {
-      await updateTimesheet(editingData.id, {
+      const cleanedNames = (values.replacementNames || []).filter(
+        (name: string) => name.trim() !== ""
+      );
+
+      const updatedData = {
         ...values,
-      });
+        replacementNames: cleanedNames,
+        replacementEmployee: cleanedNames.length,
+        numberOfPeople: Number(values.numberOfPeople),
+        workingPeople: Number(values.workingPeople),
+        dailyWorkingEmployees: Number(values.dailyWorkingEmployees),
+        businessLeave: Number(values.businessLeave),
+        sickLeave: Number(values.sickLeave),
+        peopleLeave: Number(values.peopleLeave),
+        overContractEmployee: Number(values.overContractEmployee),
+      };
+
+      await updateTimesheet(editingData.id, updatedData);
       fetchData();
       setOpenModal(false);
       setEditingData(null);
     }
   };
-
-  console.log("timesheet", timesheets);
-
+  
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">จัดการข้อมูล Timesheet</h1>
@@ -64,20 +77,28 @@ export default function TimesheetPage() {
           },
           { title: "รหัสไซต์", dataIndex: "siteCode" },
           { title: "ชื่อไซต์", dataIndex: "siteName" },
-          { title: "จำนวนพนักงาน", dataIndex: "numberOfPeople" },
-          { title: "ทำงาน", dataIndex: "workingPeople" },
+          { title: "พนักงานตามสัญญา", dataIndex: "numberOfPeople" },
+          { title: "พนักงานประจำตามแผนส่งคนรายวัน", dataIndex: "workingPeople" },
+          { title: "พนักงานประจำ(ที่มาทำงาน)", dataIndex: "dailyWorkingEmployees" },
           { title: "ลากิจ", dataIndex: "businessLeave" },
           { title: "ลาป่วย", dataIndex: "sickLeave" },
           { title: "ลาอื่นๆ", dataIndex: "peopleLeave" },
-          { title: "นอกสัญญา", dataIndex: "overContractEmployee" },
-          { title: "ทดแทน", dataIndex: "replacementEmployee" },
+          { title: "พนักงานเกินสัญญา", dataIndex: "overContractEmployee" },
+          { title: "แทนงาน", dataIndex: "replacementEmployee" },
+          {
+            title: "รายชื่อคนแทนงาน",
+            dataIndex: "replacementNames",
+            render: (names: string[]) =>
+    (names || [])
+      .filter((name) => name.trim() !== "") // ตัดค่าว่างออกก่อน
+      .map((name, index) => <div key={index}>• {name}</div>),
+          },          
           {
             title: "แก้ไข",
             render: (_, record) => (
               <Button
                 onClick={() => {
                   setEditingData(record);
-                  form.setFieldsValue({ ...record, date: dayjs(record.date) });
                   setOpenModal(true);
                 }}
               >
@@ -100,57 +121,91 @@ export default function TimesheetPage() {
         width={600}
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item label="วันที่" name="date" rules={[{ required: true }]}>
+        <Form.Item label="วันที่" name="date" rules={[{ required: true }]}>
             <DatePicker className="w-full" />
           </Form.Item>
-          <Form.Item
-            label="Site Code"
-            name="siteCode"
-            rules={[{ required: true }]}
-          >
-            <Input />
+          <Form.Item label="Site Code" name="siteCode">
+            <Input disabled />
           </Form.Item>
-          <Form.Item
-            label="Site Name"
-            name="siteName"
-            rules={[{ required: true }]}
-          >
-            <Input />
+          <Form.Item label="Site Name" name="siteName">
+            <Input disabled />
           </Form.Item>
-          <Form.Item
-            label="จำนวนพนักงาน"
-            name="numberOfPeople"
-            rules={[{ required: true }]}
-          >
-            <InputNumber className="w-full" />
+          <Form.Item label="จำนวนพนักงานตามสัญญา" name="numberOfPeople">
+            <Input disabled type="number" />
           </Form.Item>
-          <Form.Item label="ทำงาน" name="workingPeople">
-            <InputNumber className="w-full" />
+          <Form.Item label="พนักงานประจำตามแผนส่งคนรายวัน" name="workingPeople">
+            <Input disabled type="number" />
           </Form.Item>
-          <Form.Item label="ลากิจ" name="businessLeave">
-            <InputNumber className="w-full" />
+          <Form.Item label="พนักงานประจำ(ที่มาทำงาน)" name="dailyWorkingEmployees">
+            <Input type="number" />
           </Form.Item>
-          <Form.Item label="ลาป่วย" name="sickLeave">
-            <InputNumber className="w-full" />
+          <Form.Item label="ลากิจ (พนักงานประจำ)" name="businessLeave">
+            <Input type="number" />
           </Form.Item>
-          <Form.Item label="ลาอื่นๆ" name="peopleLeave">
-            <InputNumber className="w-full" />
+          <Form.Item label="ลาป่วย (พนักงานประจำ)" name="sickLeave">
+            <Input type="number" />
           </Form.Item>
-          <Form.Item label="นอกสัญญา" name="overContractEmployee">
-            <InputNumber className="w-full" />
+          <Form.Item label="ขาดงาน (พนักงานประจำ)" name="peopleLeave">
+            <Input type="number" />
           </Form.Item>
-          <Form.Item label="ทดแทน" name="replacementEmployee">
-            <InputNumber className="w-full" />
+          <Form.Item label="พนักงานเกินสัญญา" name="overContractEmployee">
+            <Input type="number" />
           </Form.Item>
-          <Form.Item label="หมายเหตุ" name="remark">
-            <Input.TextArea />
+
+
+          <Form.Item label="จำนวนคนแทนงาน" name="replacementEmployee">
+            <Input
+              type="number"
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                if (!isNaN(value) && value > replacementCount) {
+                  const current = form.getFieldValue("replacementNames") || [];
+                  const added = Array.from({ length: value - current.length }, () => "");
+                  const updated = [...current, ...added];
+                  form.setFieldsValue({ replacementNames: updated });
+                  setReplacementCount(value);
+                }
+              }}
+              className="w-full"
+            />
           </Form.Item>
-          <Form.Item label="ชื่อผู้บันทึก" name="nameadmin">
-            <Input />
-          </Form.Item>
-          <Form.Item label="รายชื่อผู้ทดแทน" name="replacementNames">
-            <Input.TextArea />
-          </Form.Item>
+
+          {Array.from({ length: replacementCount }, (_, index) => (
+            <Form.Item
+              key={index}
+              label={`ชื่อคนแทนงาน ${index + 1}`}
+              required
+              style={{ marginBottom: 0 }}
+            >
+              <div className="flex gap-2 items-start">
+                <Form.Item
+                  name={["replacementNames", index]}
+                  noStyle
+                  rules={[{ required: true, message: "กรุณากรอกชื่อคนแทนงาน" }]}
+                >
+                  <Input className="w-full" />
+                </Form.Item>
+                <Button
+                  danger
+                  onClick={() => {
+                    const current = form.getFieldValue("replacementNames") || [];
+                    const updated = [...current];
+                    updated.splice(index, 1);
+                    form.setFieldsValue({
+                      replacementNames: updated,
+                      replacementEmployee: updated.length,
+                    });
+                    setReplacementCount(updated.length);
+                  }}
+                >
+                  ลบ
+                </Button>
+              </div>
+            </Form.Item>
+          ))}
+
+          <Form.Item label="หมายเหตุ" name="remark"> <Input.TextArea /> </Form.Item>
+          <Form.Item label="ชื่อผู้บันทึก" name="nameadmin"> <Input /> </Form.Item>
         </Form>
       </Modal>
     </div>

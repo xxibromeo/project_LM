@@ -7,6 +7,7 @@ export async function getAllSites() {
 
 // เพิ่ม Site
 export async function addSite(data: {
+
   siteCode: string;
   siteName: string;
   clientName: string;
@@ -17,6 +18,7 @@ export async function addSite(data: {
   typeSite: string;
   adminWage: string;
   siteSupervisorName: string;
+  status?:string
 }) {
   return await prisma.site.create({ data });
 }
@@ -31,6 +33,8 @@ export async function updateSite(
     startDate: Date;
     endDate: Date;
     numberOfPeople: number;
+    status?:string
+
   }
 ) {
   return await prisma.site.update({

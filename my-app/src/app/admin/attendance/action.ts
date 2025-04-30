@@ -26,10 +26,10 @@ export async function updateTimesheet(
     sickLeave: number;
     peopleLeave: number;
     overContractEmployee: number;
-    replacementEmployee: number;
-    replacementNames: string[];
-    remark: string;
-    nameadmin: string;
+    replacementEmployee?: number;
+    replacementNames?: string[];
+    remark?: string;
+    nameadmin?: string;
   }
 ) {
   return await prisma.lMTimesheetRecords.update({

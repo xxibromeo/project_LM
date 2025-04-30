@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs"; // เพิ่ม import นี้ที่หัวไฟล์ด้วย
 
-import { Table, Modal, Form, Input, Button, DatePicker } from "antd";
+import { Table, Modal, Form, Input, Button, DatePicker, Select } from "antd";
 import {
   getAllSites,
   addSite,
@@ -18,6 +18,7 @@ type Site = {
   siteName: string | null;
   numberOfPeople: number | null;
   clientName: string | null;
+  status: string | null;
 };
 
 export default function SiteManagementPage() {
@@ -41,23 +42,32 @@ export default function SiteManagementPage() {
       ...values,
       startDate: values.startDate ? values.startDate.toDate() : undefined,
       endDate: values.endDate ? values.endDate.toDate() : undefined,
+      numberOfPeople: parseInt(values.numberOfPeople, 10) || 0,
+      penaltyRate: values.penaltyRate !== undefined && values.penaltyRate !== ""
+        ? parseInt(values.penaltyRate, 10)
+        : null,
     };
-
+    
+  
+    // ตรวจสอบว่า status ถูกส่งมาด้วย
+    console.log('status:', payload.status); // ตรวจสอบค่า status
+  
     if (!editingSite) {
-      delete payload.id; // ⭐ ต้องลบ id ตอนเพิ่ม
+      delete payload.id; // ลบ id ตอนเพิ่ม
     }
-
+  
     if (editingSite) {
-      await updateSite(editingSite.id, payload);
+      await updateSite(editingSite.id, payload); // ส่งข้อมูลที่แก้ไขไป
     } else {
-      await addSite(payload);
+      await addSite(payload); // ส่งข้อมูลใหม่ไป
     }
-
+  
     fetchSites();
     form.resetFields();
     setEditingSite(null);
     setOpenModal(false);
   };
+  
 
   return (
     <div className="p-6">
@@ -88,6 +98,8 @@ export default function SiteManagementPage() {
             render: (date: Date) =>
               date ? dayjs(date).format("YYYY-MM-DD") : "-",
           },
+          { title: "สถานะไซต์", dataIndex: "status" },
+
           {
             title: "Actions",
             render: (_, record: Site) => (
@@ -188,6 +200,13 @@ export default function SiteManagementPage() {
 
           <Form.Item label="Site Supervisor Name" name="siteSupervisorName">
             <Input />
+          </Form.Item>
+
+          <Form.Item label="สถานะไซต์" name="status">
+            <Select placeholder="เลือกสถานะไซต์">
+              <Select.Option value="active ">ยังไม่หมดอายุสัญญา</Select.Option>
+              <Select.Option value="expired">หมดสัญญา</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

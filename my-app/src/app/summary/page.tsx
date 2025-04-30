@@ -4,46 +4,67 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Card, Button, Divider } from "antd";
 import Image from "next/image";
 
+// กำหนดประเภทของข้อมูลที่คาดว่าจะได้รับ
+interface TimesheetData {
+  siteName: string;
+  siteCode: string;
+  numberOfPeople: number;
+  workingPeople: number;
+  dailyWorkingEmployees: number;
+  businessLeave: number;
+  sickLeave: number;
+  peopleLeave: number;
+  overContractEmployee: number;
+  replacementEmployee: number;
+  replacementNames: string[];
+  remark: string;
+}
+
 export default function SummaryPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const dataString = searchParams.get("data");
 
-  const parsedData = dataString ? JSON.parse(decodeURIComponent(dataString)) : null;
+  // กำหนดประเภทของ parsedData เป็น TimesheetData หรือ null
+  const parsedData: TimesheetData | null = dataString
+    ? JSON.parse(decodeURIComponent(dataString))
+    : null;
+
+  // กรณีที่ไม่พบข้อมูลจาก URL
+  if (!parsedData) {
+    return <p className="text-center">ไม่พบข้อมูล</p>;
+  }
 
   const fieldMapping: { [key: string]: string } = {
     date: "วันที่",
     subSite: "Sub Site",
     siteCode: "Site Code",
     siteName: "ชื่อไซต์",
-    numberOfPeople: "จำนวนพนักงานตามสัญญา",
-    dailyWorkingEmployees: "พนักงานประจำที่มาทำงาน",
-    workingPeople: "พนักงานที่ทำงานจริง",
+    numberOfPeople: "พนักงานตามสัญญา",
+    workingPeople: "พนักงานประจำตามแผนส่งคนรายวัน",
+    dailyWorkingEmployees: "พนักงานประจำ(ที่มาทำงาน)", // ย้ายไปหลังจาก "พนักงานตามแผนส่งคนรายวัน"
     businessLeave: "ลากิจ (พนักงานประจำ)",
     sickLeave: "ลาป่วย (พนักงานประจำ)",
     peopleLeave: "ขาดงาน (พนักงานประจำ)",
     overContractEmployee: "พนักงานเกินสัญญา",
     replacementEmployee: "จำนวนคนแทนงาน",
     replacementNames: "ชื่อคนแทนงาน",
-    remark: "หมายเหตุ",
+    remark: "หมายเหตุ ",
   };
-
-  const formatValue = (val: any, key?: string) => {
-    if (key === "date") {
-      const date = new Date(val);
-      return date.toLocaleDateString("th-TH");
-    }
-    if (Array.isArray(val)) {
-      const clean = val.filter((v) => v && v.trim() !== "");
-      return clean.length > 0 ? clean.map((v, i) => `${i + 1}. ${v}`).join("\n") : "-";
-    }
-    if (val === null || val === undefined || val === "") return "-";
-    return val;
-  };
-
-  if (!parsedData) {
-    return <p className="text-center">ไม่พบข้อมูล</p>;
+  
+  // ฟังก์ชันการจัดรูปแบบค่า
+  const formatValue = (val: unknown, key?: string): string => {
+  if (key === "date") {
+    const date = new Date(val as string);  // ใช้ type assertion
+    return date.toLocaleDateString("th-TH");
   }
+  if (Array.isArray(val)) {
+    const clean = val.filter((v) => v && v.trim() !== "");
+    return clean.length > 0 ? clean.map((v, i) => `${i + 1}. ${v}`).join("\n") : "0";
+  }
+  if (val === null || val === undefined || val === "") return "0";
+  return String(val);  // แปลงทุกอย่างเป็น string
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
@@ -59,7 +80,7 @@ export default function SummaryPage() {
             .filter(([k]) => k !== "nameadmin")
             .map(([k, v]) => (
               <div key={k}>
-                <p className="text-[#E30613] font-semibold">{fieldMapping[k] ?? k}</p>
+                <p className="text-[#E30613] font-semibold">{fieldMapping[k] || k}</p>
                 <p className="text-black whitespace-pre-line">{formatValue(v, k)}</p>
               </div>
             ))}
