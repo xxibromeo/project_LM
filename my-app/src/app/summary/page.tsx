@@ -18,7 +18,7 @@ export default function SummaryPage() {
   const parsedData = JSON.parse(decodeURIComponent(dataString));
 
   const formatThaiDate = (dateStr: string) => {
-    return dayjs(dateStr).locale("th").format("D MMM BBBB");
+    return dayjs(dateStr).locale("th").format("D MMM YYYY");
   };
 
   return (
@@ -44,7 +44,6 @@ export default function SummaryPage() {
 
             <p className="text-red-600 font-bold">พนักงานประจำ(ที่มาทำงาน)</p>
             <p>{parsedData.dailyWorkingEmployees || 0}</p>
-
 
             <p className="text-red-600 font-bold">ชื่อไซต์</p>
             <p>{parsedData.siteName || 0}</p>
@@ -86,10 +85,24 @@ export default function SummaryPage() {
         </div>
 
         <div className="flex justify-center gap-4 mt-10">
-          <Button type="default" onClick={() => router.back()}>
+          <Button
+            type="default"
+            onClick={() =>
+              router.push(
+                `/summary/edit?data=${encodeURIComponent(
+                  JSON.stringify(parsedData)
+                )}`
+              )
+            }
+          >
             แก้ไขข้อมูล
           </Button>
-          <Button type="primary" danger onClick={() => signOut()}>
+
+          <Button
+            type="primary"
+            className="bg-blue-500"
+            onClick={() => signOut()}
+          >
             ยืนยัน
           </Button>
         </div>
