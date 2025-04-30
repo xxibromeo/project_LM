@@ -10,9 +10,9 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
- 
+
 const { Header, Sider, Content } = Layout;
- 
+
 export const menuItems = [
   {
     key: "dashboard",
@@ -20,7 +20,6 @@ export const menuItems = [
     icon: <DashboardOutlined />,
     path: "/admin/dashboard",
   },
-  
   {
     key: "attendance",
     label: "Time Attendance",
@@ -40,25 +39,25 @@ export const menuItems = [
     path: "/admin/dayoff",
   },
 ];
- 
+
 export default function SharedLayout({ children }: React.PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
   const { data } = useSession();
- 
+
   const handleLogout = () => {
     signOut({ callbackUrl: "/admin/login" });
   };
- 
-  const userMenu = (
-    <Menu>
-      <Menu.Divider />
-      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-        ออกจากระบบ
-      </Menu.Item>
-    </Menu>
-  );
- 
+
+  // ✅ เปลี่ยนจาก <Menu> → มาใช้ items array แทน
+  const userMenuItems = [
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: <span onClick={handleLogout}>ออกจากระบบ</span>,
+    },
+  ];
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Sidebar */}
@@ -75,7 +74,7 @@ export default function SharedLayout({ children }: React.PropsWithChildren) {
             สยามราชธานี จำกัด มหาชน
           </div>
         </div>
- 
+
         <Menu
           theme="light"
           mode="vertical"
@@ -88,7 +87,7 @@ export default function SharedLayout({ children }: React.PropsWithChildren) {
           }))}
         />
       </Sider>
- 
+
       {/* Main Content */}
       <Layout>
         {/* Header */}
@@ -96,8 +95,8 @@ export default function SharedLayout({ children }: React.PropsWithChildren) {
           style={{ padding: 0, background: "#fff" }}
           className="px-4 shadow flex justify-end items-center"
         >
-          {/* User Avatar Dropdown */}
-          <Dropdown overlay={userMenu} trigger={["hover"]} className="mr-5">
+          {/* ✅ เปลี่ยน overlay → menu */}
+          <Dropdown menu={{ items: userMenuItems }} trigger={["hover"]} className="mr-5">
             <Space className="cursor-pointer">
               <Avatar
                 size="large"
@@ -110,7 +109,7 @@ export default function SharedLayout({ children }: React.PropsWithChildren) {
             </Space>
           </Dropdown>
         </Header>
- 
+
         {/* Content */}
         <Content className="m-4 p-6 bg-white shadow rounded-lg">
           {children}

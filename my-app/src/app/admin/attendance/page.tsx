@@ -2,19 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { Table, Modal, Form, Input, Button, DatePicker } from "antd";
+import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
 import {
   getAllTimesheets,
   updateTimesheet,
   ILMTimesheetRecords,
 } from "@/app/admin/attendance/action";
-import dayjs from "dayjs";
 
 export default function TimesheetPage() {
   const [timesheets, setTimesheets] = useState<ILMTimesheetRecords[]>([]);
   const [openModal, setOpenModal] = useState(false);
-  const [editingData, setEditingData] = useState<ILMTimesheetRecords | null>(null);
+  const [editingData, setEditingData] = useState<ILMTimesheetRecords | null>(
+    null
+  );
   const [replacementCount, setReplacementCount] = useState(0);
   const [form] = Form.useForm();
+  const { data: session } = useSession(); // ✅ เปลี่ยนชื่อเป็น session เพื่อไม่ชนกับ data
 
   const fetchData = async () => {
     const res = await getAllTimesheets();
@@ -25,17 +29,21 @@ export default function TimesheetPage() {
     fetchData();
   }, []);
 
+  // ✅ ตั้งค่าฟอร์มเมื่อ editingData และ session พร้อมแล้ว
   useEffect(() => {
-    if (editingData) {
-      setReplacementCount(editingData.replacementEmployee || 0);
-      form.setFieldsValue({
-        ...editingData,
-        date: dayjs(editingData.date),
-      });
-    }
-  }, [editingData, form]);
+    if (!editingData || !session?.user?.name) return;
+  
+    form.setFieldsValue({
+      ...editingData,
+      date: dayjs(editingData.date),
+      nameadmin: session.user.name,
+    });
+    setReplacementCount(editingData.replacementEmployee || 0);
+  }, [editingData, form, session?.user?.name]);
+  
 
-  const onFinish = async (values: any) => {
+
+  const onFinish = async (values: ILMTimesheetRecords) => {
     if (editingData) {
       const cleanedNames = (values.replacementNames || []).filter(
         (name: string) => name.trim() !== ""
@@ -60,7 +68,7 @@ export default function TimesheetPage() {
       setEditingData(null);
     }
   };
-  
+
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">จัดการข้อมูล Timesheet</h1>
@@ -78,8 +86,14 @@ export default function TimesheetPage() {
           { title: "รหัสไซต์", dataIndex: "siteCode" },
           { title: "ชื่อไซต์", dataIndex: "siteName" },
           { title: "พนักงานตามสัญญา", dataIndex: "numberOfPeople" },
-          { title: "พนักงานประจำตามแผนส่งคนรายวัน", dataIndex: "workingPeople" },
-          { title: "พนักงานประจำ(ที่มาทำงาน)", dataIndex: "dailyWorkingEmployees" },
+          {
+            title: "พนักงานประจำตามแผนส่งคนรายวัน",
+            dataIndex: "workingPeople",
+          },
+          {
+            title: "พนักงานประจำ(ที่มาทำงาน)",
+            dataIndex: "dailyWorkingEmployees",
+          },
           { title: "ลากิจ", dataIndex: "businessLeave" },
           { title: "ลาป่วย", dataIndex: "sickLeave" },
           { title: "ลาอื่นๆ", dataIndex: "peopleLeave" },
@@ -89,10 +103,10 @@ export default function TimesheetPage() {
             title: "รายชื่อคนแทนงาน",
             dataIndex: "replacementNames",
             render: (names: string[]) =>
-    (names || [])
-      .filter((name) => name.trim() !== "") // ตัดค่าว่างออกก่อน
-      .map((name, index) => <div key={index}>• {name}</div>),
-          },          
+              (names || [])
+                .filter((name) => name.trim() !== "")
+                .map((name, index) => <div key={index}>• {name}</div>),
+          },
           {
             title: "แก้ไข",
             render: (_, record) => (
@@ -119,9 +133,10 @@ export default function TimesheetPage() {
         onOk={() => form.submit()}
         title="แก้ไข Timesheet"
         width={600}
+        forceRender
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item label="วันที่" name="date" rules={[{ required: true }]}>
+          <Form.Item label="วันที่" name="date" rules={[{ required: true }]}>
             <DatePicker className="w-full" />
           </Form.Item>
           <Form.Item label="Site Code" name="siteCode">
@@ -133,10 +148,16 @@ export default function TimesheetPage() {
           <Form.Item label="จำนวนพนักงานตามสัญญา" name="numberOfPeople">
             <Input disabled type="number" />
           </Form.Item>
-          <Form.Item label="พนักงานประจำตามแผนส่งคนรายวัน" name="workingPeople">
+          <Form.Item
+            label="พนักงานประจำตามแผนส่งคนรายวัน"
+            name="workingPeople"
+          >
             <Input disabled type="number" />
           </Form.Item>
-          <Form.Item label="พนักงานประจำ(ที่มาทำงาน)" name="dailyWorkingEmployees">
+          <Form.Item
+            label="พนักงานประจำ(ที่มาทำงาน)"
+            name="dailyWorkingEmployees"
+          >
             <Input type="number" />
           </Form.Item>
           <Form.Item label="ลากิจ (พนักงานประจำ)" name="businessLeave">
@@ -148,19 +169,25 @@ export default function TimesheetPage() {
           <Form.Item label="ขาดงาน (พนักงานประจำ)" name="peopleLeave">
             <Input type="number" />
           </Form.Item>
-          <Form.Item label="พนักงานเกินสัญญา" name="overContractEmployee">
+          <Form.Item
+            label="พนักงานเกินสัญญา"
+            name="overContractEmployee"
+          >
             <Input type="number" />
           </Form.Item>
-
 
           <Form.Item label="จำนวนคนแทนงาน" name="replacementEmployee">
             <Input
               type="number"
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
-                if (!isNaN(value) && value > replacementCount) {
-                  const current = form.getFieldValue("replacementNames") || [];
-                  const added = Array.from({ length: value - current.length }, () => "");
+                if (!isNaN(value)) {
+                  const current =
+                    form.getFieldValue("replacementNames") || [];
+                  const added = Array.from(
+                    { length: value - current.length },
+                    () => ""
+                  );
                   const updated = [...current, ...added];
                   form.setFieldsValue({ replacementNames: updated });
                   setReplacementCount(value);
@@ -181,14 +208,23 @@ export default function TimesheetPage() {
                 <Form.Item
                   name={["replacementNames", index]}
                   noStyle
-                  rules={[{ required: true, message: "กรุณากรอกชื่อ-สกุลคนแทนงาน" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "กรุณากรอกชื่อ-สกุลคนแทนงาน",
+                    },
+                  ]}
                 >
-                  <Input className="w-full" placeholder="กรุณากรอกชื่อ-สกุลคนแทนงาน"/>
+                  <Input
+                    className="w-full"
+                    placeholder="กรุณากรอกชื่อ-สกุลคนแทนงาน"
+                  />
                 </Form.Item>
                 <Button
                   danger
                   onClick={() => {
-                    const current = form.getFieldValue("replacementNames") || [];
+                    const current =
+                      form.getFieldValue("replacementNames") || [];
                     const updated = [...current];
                     updated.splice(index, 1);
                     form.setFieldsValue({
@@ -204,8 +240,12 @@ export default function TimesheetPage() {
             </Form.Item>
           ))}
 
-          <Form.Item label="หมายเหตุ" name="remark"> <Input.TextArea /> </Form.Item>
-          <Form.Item label="ชื่อผู้บันทึก" name="nameadmin"> <Input /> </Form.Item>
+          <Form.Item label="หมายเหตุ" name="remark">
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item label="ชื่อผู้บันทึก" name="nameadmin">
+            <Input disabled />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
