@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import { useEffect, useState } from "react";
 import {
   Table,
@@ -12,6 +10,7 @@ import {
   Button,
   DatePicker,
   Popconfirm,
+  Select,
 } from "antd";
 import {
   getAllSiteDayOff,
@@ -21,8 +20,18 @@ import {
 } from "./action";
 import dayjs from "dayjs";
 
+type Site = {
+  subSite: string;
+  siteCode: string;
+  siteName: string;
+  typeSite: string;
+  numberOfPeople: number;
+  penaltyRate: number;
+};
+
+
 type SiteDayOff = {
-  id:number;
+  id: number;
   workDate: Date;
   subSite: string;
   siteCode: string;
@@ -30,11 +39,12 @@ type SiteDayOff = {
   typeSite: string;
   numberOfPeople: number;
   penaltyRate: number;
-  dailyWorkingEmployees: number;
+  workingPeople:number|null;
 };
 
 export default function SiteDayOffPage() {
   const [data, setData] = useState<SiteDayOff[]>([]);
+  const [siteList, setSiteList] = useState<Site[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [editingRecord, setEditingRecord] = useState<SiteDayOff | null>(null);
   const [form] = Form.useForm();
@@ -46,19 +56,18 @@ export default function SiteDayOffPage() {
 
   useEffect(() => {
     fetchData();
+    fetch("/api/site-list")
+      .then((res) => res.json())
+      .then(setSiteList);
   }, []);
 
   const onFinish = async (values: SiteDayOff) => {
     const payload = {
       ...values,
       workDate: values.workDate,
-      subSite: values.subSite,
-      siteCode: values.siteCode,
-      siteName: values.siteName,
-      typeSite: values.typeSite,
       numberOfPeople: Number(values.numberOfPeople),
       penaltyRate: Number(values.penaltyRate),
-      dailyWorkingEmployees: Number(values.dailyWorkingEmployees),
+      workingPeople: Number(values.workingPeople),
     };
 
     if (editingRecord) {
@@ -102,9 +111,9 @@ export default function SiteDayOffPage() {
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
           { title: "Type Site", dataIndex: "typeSite" },
-          { title: "จำนวนคน", dataIndex: "numberOfPeople" },
+          { title: "จำนวนพนักงานตามสัญญา", dataIndex: "numberOfPeople" },
           { title: "ค่าปรับ", dataIndex: "penaltyRate" },
-          { title: "ทำงานจริง", dataIndex: "dailyWorkingEmployees" },
+          { title: "พนักงานประจำตามแผนส่งคนรายวัน", dataIndex: "workingPeople" },
           {
             title: "Action",
             render: (_, record: SiteDayOff) => (
@@ -152,51 +161,61 @@ export default function SiteDayOffPage() {
           >
             <DatePicker className="w-full" />
           </Form.Item>
-          <Form.Item
-            label="SubSite"
-            name="subSite"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Site Code"
-            name="siteCode"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
+
           <Form.Item
             label="Site Name"
             name="siteName"
             rules={[{ required: true }]}
           >
-            <Input />
+            <Select
+              showSearch
+              placeholder="เลือกชื่อไซต์"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                String(option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              onChange={(value) => {
+                const selected = siteList.find((s) => s.siteName === value);
+                if (selected) {
+                  form.setFieldsValue({
+                    subSite: selected.subSite,
+                    siteCode: selected.siteCode,
+                    typeSite: selected.typeSite,
+                    numberOfPeople: selected.numberOfPeople,
+                    penaltyRate: selected.penaltyRate,
+                  });
+                }
+              }}
+            >
+              {siteList.map((site) => (
+                <Select.Option key={site.siteName} value={site.siteName}>
+                  {site.siteName}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
-          <Form.Item
-            label="Type Site"
-            name="typeSite"
-            rules={[{ required: true }]}
-          >
-            <Input />
+
+          <Form.Item name="subSite" label="SubSite">
+            <Input disabled />
           </Form.Item>
-          <Form.Item
-            label="จำนวนคน"
-            name="numberOfPeople"
-            rules={[{ required: true }]}
-          >
-            <InputNumber className="w-full" min={1} />
+          <Form.Item name="siteCode" label="Site Code">
+            <Input disabled />
           </Form.Item>
-          <Form.Item
-            label="ค่าปรับ"
-            name="penaltyRate"
-            rules={[{ required: true }]}
-          >
-            <InputNumber className="w-full" min={0} />
+          <Form.Item name="typeSite" label="ประเภทการชดเชย">
+            <Input disabled />
           </Form.Item>
+          <Form.Item name="numberOfPeople" label="พนักงานตามสัญญา">
+            <InputNumber className="w-full" disabled />
+          </Form.Item>
+          <Form.Item name="penaltyRate" label="ค่าปรับ">
+            <InputNumber className="w-full" disabled />
+          </Form.Item>
+
           <Form.Item
-            label="ทำงานจริง"
-            name="dailyWorkingEmployees"
+            label="พนักงานประจำตามแผนส่งคนรายวัน"
+            name="workingPeople"
             rules={[{ required: true }]}
           >
             <InputNumber className="w-full" min={0} />

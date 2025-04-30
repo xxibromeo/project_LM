@@ -185,7 +185,7 @@ export default function SiteManagementPage() {
             <Input />
           </Form.Item>
           <Form.Item
-            label="Client Name"
+            label="ชื่อลูกค้า"
             name="clientName"
             rules={[{ required: true }]}
           >
@@ -193,7 +193,7 @@ export default function SiteManagementPage() {
           </Form.Item>
 
           <Form.Item
-            label="Start Date"
+            label="วันที่เริ่มงาน"
             name="startDate"
             rules={[{ required: true }]}
           >
@@ -201,7 +201,7 @@ export default function SiteManagementPage() {
           </Form.Item>
 
           <Form.Item
-            label="End Date"
+            label="วันที่สิ้นสุดการทำงาน"
             name="endDate"
             rules={[{ required: true }]}
           >
@@ -215,7 +215,7 @@ export default function SiteManagementPage() {
           >
             <Input type="number" min={1} className="w-full" />
           </Form.Item>
-          <Form.Item label="อัตราค่าปรับ" name="penaltyRate">
+          <Form.Item label="อัตราค่าปรับ(บาท)" name="penaltyRate">
             <Input type="number" min={0} className="w-full" />
           </Form.Item>
 

@@ -18,7 +18,7 @@ export async function addSiteDayOff(data: {
   typeSite: string;
   numberOfPeople: number;
   penaltyRate: number;
-  dailyWorkingEmployees: number;
+  workingPeople: number;
 }) {
   return await prisma.siteDayOff.create({
     data,
@@ -34,7 +34,7 @@ export async function updateSiteDayOff(id: number, data: {
   typeSite: string;
   numberOfPeople: number;
   penaltyRate: number;
-  dailyWorkingEmployees: number;
+  workingPeople: number;
 }) {
   return await prisma.siteDayOff.update({
     where: { id },

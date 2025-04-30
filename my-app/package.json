@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prisma:migrate": "prisma migrate dev --preview-feature",
+    "prisma:migrate:reset": "prisma migrate reset",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio"
   },

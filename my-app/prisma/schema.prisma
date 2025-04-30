@@ -14,9 +14,9 @@ datasource db {
 }
 
 model LMTimesheetRecords {
-  id                    Int      @id @unique @default(autoincrement())
+  id                    Int      @id @default(autoincrement())
   date                  DateTime @default(now()) // วันที่บันทึก
-  subSite               String // ✅ ชื่อ field จริง
+  subSite               String
   siteCode              String
   siteName              String
   numberOfPeople        Int
@@ -34,40 +34,44 @@ model LMTimesheetRecords {
   updateAt              DateTime @updatedAt
 
   // ความสัมพันธ์
-  site       Site?       @relation(fields: [siteCode], references: [siteCode])
-  siteDayOff SiteDayOff? @relation("SiteDayOffToTimesheet", fields: [subSite], references: [subSite])
+  site Site @relation("TimesheetToSite", fields: [subSite], references: [subSite])
 }
 
 model Site {
-  id                 Int                  @id @unique @default(autoincrement())
-  subSite            String               @unique
-  siteCode           String               @unique // ทำให้ sitecode เป็น unique เพื่อเชื่อมโยงกับ LMTimesheetRecords ได้
+  id                 Int      @id @default(autoincrement())
+  subSite            String   @unique
+  siteCode           String
   siteName           String
   clientName         String
-  startDate          DateTime             @default(now()) //วันที่เริ่มสัญญา
-  endDate            DateTime             @default(now())
+  startDate          DateTime @default(now())
+  endDate            DateTime @default(now())
   numberOfPeople     Int
-  penaltyRate        Int //ค่าปรับ?
+  penaltyRate        Int
   typeSite           String
-  adminWage          String //ธุรการ(ค่าแรง)
+  adminWage          String
   siteSupervisorName String
   status             String
-  LMTimesheetRecords LMTimesheetRecords[] // เชื่อมโยงกลับจาก LMTimesheetRecords
-  SiteEmployees      SiteDayOff[]
-  createdAt          DateTime             @default(now())
-  updateAt           DateTime             @updatedAt
+  createdAt          DateTime @default(now())
+  updateAt           DateTime @updatedAt
+
+  // ความสัมพันธ์
+  timesheets        LMTimesheetRecords[] @relation("TimesheetToSite")
+  siteDayOffRecords SiteDayOff[]         @relation("DayOffToSite")
 }
 
 model SiteDayOff {
-  id                    Int                  @id @unique @default(autoincrement())
-  workDate              DateTime             @default(now())
-  subSite               String               @unique
-  siteCode              String
-  siteName              String
-  typeSite              String
-  numberOfPeople        Int
-  penaltyRate           Int //ค่าปรับ
-  dailyWorkingEmployees Int
-  site                  Site                 @relation(fields: [subSite], references: [subSite])
-  LMTimesheetRecords    LMTimesheetRecords[] @relation("SiteDayOffToTimesheet")
+  id             Int      @id @default(autoincrement())
+  workDate       DateTime @default(now())
+  subSite        String
+  siteCode       String
+  siteName       String
+  typeSite       String
+  numberOfPeople Int
+  penaltyRate    Int
+  workingPeople  Int?
+  createdAt      DateTime @default(now())
+  updateAt       DateTime @updatedAt
+
+  // ความสัมพันธ์
+  site Site @relation("DayOffToSite", fields: [subSite], references: [subSite])
 }
