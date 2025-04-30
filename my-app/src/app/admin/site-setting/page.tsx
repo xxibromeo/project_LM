@@ -11,14 +11,20 @@ import {
 } from "@/app/admin/site-setting/action";
 
 type Site = {
-  endDate: Date;
-  startDate: Date;
   id: number;
-  siteCode: string | null;
-  siteName: string | null;
-  numberOfPeople: number | null;
+  siteCode: string;
+  siteName: string;
+  subSite:string;
   clientName: string | null;
+  startDate: Date;
+  endDate: Date;
+  numberOfPeople: number | null;
+  penaltyRate: number| null;
+  typeSite: string| null;
+  adminWage: string| null;
+  siteSupervisorName: string|null;
   status: string | null;
+
 };
 
 export default function SiteManagementPage() {
@@ -84,22 +90,25 @@ export default function SiteManagementPage() {
         columns={[
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
-          { title: "จำนวนคน", dataIndex: "numberOfPeople" },
           { title: "ชื่อลูกค้า", dataIndex: "clientName" },
+          { title: "พนักงานตามสัญญา", dataIndex: "numberOfPeople" },
           {
             title: "วันที่เริ่มงาน",
             dataIndex: "startDate",
             render: (date: Date) =>
-              date ? dayjs(date).format("YYYY-MM-DD") : "-",
+              date ? dayjs(date).format("DD-MM-YYYY") : "-",
           },
           {
             title: "วันที่สิ้นสุดงาน",
             dataIndex: "endDate",
             render: (date: Date) =>
-              date ? dayjs(date).format("YYYY-MM-DD") : "-",
+              date ? dayjs(date).format("DD-MM-YYYY") : "-",
           },
+          { title: "อัตราค่าปรับ", dataIndex: "penaltyRate" },
+          { title: "ประเภทการชดเชย", dataIndex: "typeSite" },
+          { title: "ธุรการ(ค่าแรง)", dataIndex: "adminWage" },
+          { title: "ชื่อหน.ไซด์", dataIndex: "siteSupervisorName" },
           { title: "สถานะไซต์", dataIndex: "status" },
-
           {
             title: "Actions",
             render: (_, record: Site) => (
@@ -176,29 +185,28 @@ export default function SiteManagementPage() {
           </Form.Item>
 
           <Form.Item
-            label="จำนวนคน"
+            label="พนักงานตามสัญญา"
             name="numberOfPeople"
             rules={[{ required: true }]}
           >
             <Input type="number" min={1} className="w-full" />
           </Form.Item>
-          <Form.Item label="Penalty Rate" name="penaltyRate">
+          <Form.Item label="อัตราค่าปรับ" name="penaltyRate">
             <Input type="number" min={0} className="w-full" />
           </Form.Item>
 
-          <Form.Item
-            label="Type Site"
-            name="typeSite"
-            rules={[{ required: true }]}
-          >
+          <Form.Item label="ประเภทการชดเชย" name="typeSite">
+            <Select placeholder="เลือกประเภทการชดเชย">
+              <Select.Option value="ชดเชยรายเดือน ">ชดเชยรายเดือน</Select.Option>
+              <Select.Option value="ชดเชยรายวัน">ชดเชยรายวัน</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="ธุรการ(ค่าแรง)" name="adminWage">
             <Input />
           </Form.Item>
 
-          <Form.Item label="Admin Wage" name="adminWage">
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Site Supervisor Name" name="siteSupervisorName">
+          <Form.Item label="ชื่อหน.ไซด์" name="siteSupervisorName">
             <Input />
           </Form.Item>
 
