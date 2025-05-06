@@ -17,12 +17,6 @@ export default function EditSummaryPage() {
     ? JSON.parse(decodeURIComponent(dataString))
     : null;
 
-  console.log(
-    "JSON.parse(decodeURIComponent(dataString))",
-    JSON.parse(decodeURIComponent(dataString as string))
-  );
-
-  console.log('parsedData', parsedData)
   useEffect(() => {
     if (parsedData) {
       form.setFieldsValue({
@@ -43,7 +37,7 @@ export default function EditSummaryPage() {
       dailyWorkingEmployees: Number(values.dailyWorkingEmployees),
       businessLeave: Number(values.businessLeave ?? 0),
       sickLeave: Number(values.sickLeave ?? 0),
-      peopleLeave:Number( values.peopleLeave ?? 0),
+      peopleLeave: Number(values.peopleLeave ?? 0),
       overContractEmployee: Number(values.overContractEmployee ?? 0),
       replacementEmployee: Number(values.replacementEmployee ?? 0),
       replacementNames: values.replacementNames || [],
@@ -61,6 +55,7 @@ export default function EditSummaryPage() {
       const result = await response.json();
       if (response.ok) {
         // ถ้าสำเร็จให้แสดงผลและกลับไปที่หน้า summary
+        alert("บันทึกสำเสร็จ");
         router.push(
           `/summary?data=${encodeURIComponent(JSON.stringify(result))}`
         );
@@ -97,62 +92,58 @@ export default function EditSummaryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2">
             {/* ฝั่งซ้าย */}
             <div className="space-y-2">
-              <Form.Item label="วันที่" name="date">
+              <Form.Item label={<span className="font-bold text-red-600">วันที่</span>} name="date">
                 <p className="text-red-600 font-bold">วันที่</p>
                 <p>{formatThaiDate(parsedData.date)}</p>
               </Form.Item>
 
-              <Form.Item label="Site Code" name="siteCode">
+              <Form.Item label={<span className="font-bold text-red-600">Site Code</span>} name="siteCode">
+                <Input disabled />
+              </Form.Item>
+
+              <Form.Item label={<span className="font-bold text-red-600">ชื่อไซต์</span>} name="siteName">
                 <Input disabled />
               </Form.Item>
 
               <Form.Item
-                label="พนักงานตามสัญญา"
+                label={<span className="font-bold text-red-600">พนักงานตามสัญญา</span>}
                 name="numberOfPeople"
                 rules={[{ required: true }]}
               >
-                <Input type="number" />
+                <Input type="number" disabled />
               </Form.Item>
 
               <Form.Item
-                label="พนักงานประจำ (ที่มาทำงาน)"
+                label={<span className="font-bold text-red-600">พนักงานประจำตามแผนส่งคนรายวัน</span>}
+                name="workingPeople"
+              >
+                <Input type="number" disabled />
+              </Form.Item>
+
+              <Form.Item
+                label={<span className="font-bold text-red-600">พนักงานประจำ (ที่มาทำงาน)</span>}
                 name="dailyWorkingEmployees"
                 rules={[{ required: true }]}
               >
-                <Input type="number" />
-              </Form.Item>
-
-              <Form.Item label="ชื่อไซต์" name="siteName">
-                <Input disabled />
-              </Form.Item>
-
-              <Form.Item
-                label="พนักงานประจำตามแผนส่งคนรายวัน"
-                name="workingPeople"
-              >
-                <Input type="number" />
-              </Form.Item>
-
-              <Form.Item label="ลากิจ (พนักงานประจำ)" name="businessLeave">
-                <Input type="number" />
-              </Form.Item>
-
-              <Form.Item label="ขาดงาน (พนักงานประจำ)" name="peopleLeave">
                 <Input type="number" />
               </Form.Item>
             </div>
 
             {/* ฝั่งขวา */}
             <div className="space-y-2">
-              <Form.Item label="จำนวนคนแทนงาน" name="replacementEmployee">
+              <Form.Item label={<span className="font-bold text-red-600">ลากิจ (พนักงานประจำ)</span>} name="businessLeave">
                 <Input type="number" />
               </Form.Item>
 
-              <Form.Item label="ลาป่วย (พนักงานประจำ)" name="sickLeave">
+              <Form.Item label={<span className="font-bold text-red-600">ลาป่วย (พนักงานประจำ)</span>} name="sickLeave">
                 <Input type="number" />
               </Form.Item>
 
-              <Form.Item label="พนักงานเกินสัญญา" name="overContractEmployee">
+              <Form.Item label={<span className="font-bold text-red-600">พนักงานเกินสัญญา</span>} name="overContractEmployee">
+                <Input type="number" />
+              </Form.Item>
+
+              <Form.Item label={<span className="font-bold text-red-600">จำนวนคนแทนงาน</span>} name="replacementEmployee">
                 <Input type="number" />
               </Form.Item>
 
@@ -171,7 +162,7 @@ export default function EditSummaryPage() {
 
               <Form.Item
                 name="remark"
-                label={<p className="text-red-600 font-bold">หมายเหตุ</p>}
+                label={<span className="font-bold text-red-600">หมายเหตุ</span>}
               >
                 <Input.TextArea rows={3} placeholder="กรุณากรอกหมายเหตุ" />
               </Form.Item>
