@@ -7,29 +7,12 @@ import type { DatePickerProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import dayjs, { Dayjs } from "dayjs";
-import { createTimeSheet, getAllSiteData, ISite } from "./action";
+import { createTimeSheet, getAllSiteData, ISite, TFormValue } from "./action";
 import { useEffect, useState } from "react";
 
 const { Option } = Select;
 
-type TFormValue = {
-  id?: number
-  date: Date;
-  subSite: string;
-  siteCode: string;
-  siteName: string;
-  numberOfPeople: number;
-  dailyWorkingEmployees: number;
-  workingPeople: number;
-  businessLeave: number;
-  sickLeave: number;
-  peopleLeave: number;
-  overContractEmployee: number;
-  replacementEmployee: number;
-  replacementNames: string[];
-  remark: string;
-  nameadmin: string;
-};
+
 
 export default function RegisterForm() {
   const [form] = Form.useForm();

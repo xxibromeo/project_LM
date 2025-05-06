@@ -38,13 +38,15 @@ export default function EditSummaryPage() {
       id: parsedData?.id ?? 0,
       date: values.date.toISOString(), // แปลงวันที่ให้เป็น ISO String
       // กำหนดค่าเป็น 0 ถ้าค่าใดเป็น null หรือ undefined
-      businessLeave: values.businessLeave ?? 0,
-      sickLeave: values.sickLeave ?? 0,
-      peopleLeave: values.peopleLeave ?? 0,
-      overContractEmployee: values.overContractEmployee ?? 0,
-      replacementEmployee: values.replacementEmployee ?? 0,
-      workingPeople: values.workingPeople ?? 0,
-      numberOfPeople: values.numberOfPeople ?? 0,
+      workingPeople: Number(values.workingPeople ?? 0),
+      numberOfPeople: Number(values.numberOfPeople ?? 0),
+      dailyWorkingEmployees: Number(values.dailyWorkingEmployees),
+      businessLeave: Number(values.businessLeave ?? 0),
+      sickLeave: Number(values.sickLeave ?? 0),
+      peopleLeave:Number( values.peopleLeave ?? 0),
+      overContractEmployee: Number(values.overContractEmployee ?? 0),
+      replacementEmployee: Number(values.replacementEmployee ?? 0),
+      replacementNames: values.replacementNames || [],
     };
     // ส่งข้อมูลไปยัง API เพื่อบันทึกลงฐานข้อมูล
     try {
