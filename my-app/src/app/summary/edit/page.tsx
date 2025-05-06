@@ -1,52 +1,80 @@
-"use client";
-
+"use client"; // เพิ่มบรรทัดนี้ที่ด้านบนของไฟล์
 import React, { useEffect } from "react";
 import { Card, Button, Form, Input } from "antd";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { signOut } from "next-auth/react";
-import { TFormValue } from "@/app/action";
+import { TFormValue } from "@/app/action"; // ใช้ type ของข้อมูล
 
 export default function EditSummaryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dataString = searchParams.get("data");
-
   const [form] = Form.useForm();
 
   const parsedData: TFormValue | null = dataString
     ? JSON.parse(decodeURIComponent(dataString))
     : null;
 
+  console.log(
+    "JSON.parse(decodeURIComponent(dataString))",
+    JSON.parse(decodeURIComponent(dataString as string))
+  );
+
+  console.log('parsedData', parsedData)
   useEffect(() => {
     if (parsedData) {
       form.setFieldsValue({
         ...parsedData,
-        date: dayjs(parsedData.date),
+        date: dayjs(parsedData.date), // แปลงวันที่ให้แสดงในรูปแบบที่ต้องการ
       });
     }
   }, [form, parsedData]);
 
-  const onFinish = (values: TFormValue) => {
+  const onFinish = async (values: TFormValue) => {
     const updatedData = {
       ...values,
-      date: values.date.toISOString(), // ส่งเป็น string
+      id: parsedData?.id ?? 0,
+      date: values.date.toISOString(), // แปลงวันที่ให้เป็น ISO String
+      // กำหนดค่าเป็น 0 ถ้าค่าใดเป็น null หรือ undefined
+      businessLeave: values.businessLeave ?? 0,
+      sickLeave: values.sickLeave ?? 0,
+      peopleLeave: values.peopleLeave ?? 0,
+      overContractEmployee: values.overContractEmployee ?? 0,
+      replacementEmployee: values.replacementEmployee ?? 0,
+      workingPeople: values.workingPeople ?? 0,
+      numberOfPeople: values.numberOfPeople ?? 0,
     };
+    // ส่งข้อมูลไปยัง API เพื่อบันทึกลงฐานข้อมูล
+    try {
+      const response = await fetch("/api/save-summary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData), // ส่งข้อมูลที่แก้ไขไป
+      });
 
-    // ✅ ส่งข้อมูลแล้วออกจากระบบ
-    router.push(
-      `/summary?data=${encodeURIComponent(JSON.stringify(updatedData))}`
-    );
-    signOut(); // ออกจากระบบ
+      const result = await response.json();
+      if (response.ok) {
+        // ถ้าสำเร็จให้แสดงผลและกลับไปที่หน้า summary
+        router.push(
+          `/summary?data=${encodeURIComponent(JSON.stringify(result))}`
+        );
+      } else {
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      }
+    } catch (error) {
+      console.error(error); // สำหรับ debug
+      alert("ไม่สามารถบันทึกข้อมูลได้");
+    }
   };
 
   if (!parsedData) return <p className="text-center">ไม่พบข้อมูล</p>;
 
   const formatThaiDate = (date: string | Date) =>
-    dayjs(date).locale("th").format("D MMM YYYY");
-  
+    dayjs(date).locale("th").format("D MMM YYYY"); // แปลงวันที่เป็นภาษาไทย
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">

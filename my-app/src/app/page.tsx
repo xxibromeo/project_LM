@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 const { Option } = Select;
 
 type TFormValue = {
+  id?: number
   date: Date;
   subSite: string;
   siteCode: string;
@@ -109,7 +110,7 @@ export default function RegisterForm() {
     if (save) {
       form.resetFields();
       router.push(
-        `/summary?data=${encodeURIComponent(JSON.stringify(dataToSend))}`
+        `/summary?data=${encodeURIComponent(JSON.stringify(save))}`
       );
     }
   };

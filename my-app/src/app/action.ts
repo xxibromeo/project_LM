@@ -4,6 +4,7 @@ import { PrismaClient, Site, SiteDayOff } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export type TFormValue = {
+  id?: number;
   date: Date;
   subSite: string;
   siteName: string;
@@ -58,7 +59,7 @@ export const createTimeSheet = async (data: TFormValue) => {
     });
 
     if (result) {
-      return true;
+      return result;
     }
     return null;
   } catch (error) {

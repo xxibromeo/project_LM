@@ -16,6 +16,7 @@ export default function SummaryPage() {
   if (!dataString) return <p className="text-center">ไม่พบข้อมูล</p>;
 
   const parsedData = JSON.parse(decodeURIComponent(dataString));
+  console.log('parsedData', parsedData)
 
   const formatThaiDate = (dateStr: string) => {
     return dayjs(dateStr).locale("th").format("D MMM YYYY");
@@ -101,7 +102,9 @@ export default function SummaryPage() {
           <Button
             type="primary"
             className="bg-blue-500"
-            onClick={() => signOut()}
+            onClick={async () => {
+              await signOut({ callbackUrl: "/" }); // เปลี่ยนเส้นทางไปที่หน้าแรก
+            }}
           >
             ยืนยัน
           </Button>
