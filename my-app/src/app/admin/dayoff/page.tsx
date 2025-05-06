@@ -29,7 +29,6 @@ type Site = {
   penaltyRate: number;
 };
 
-
 type SiteDayOff = {
   id: number;
   workDate: Date;
@@ -39,7 +38,7 @@ type SiteDayOff = {
   typeSite: string;
   numberOfPeople: number;
   penaltyRate: number;
-  workingPeople:number|null;
+  workingPeople: number|null;
 };
 
 export default function SiteDayOffPage() {
@@ -51,6 +50,7 @@ export default function SiteDayOffPage() {
 
   const fetchData = async () => {
     const res = await getAllSiteDayOff();
+    console.log("Fetched SiteDayOff Data:", res); // เพิ่มการแสดงผลข้อมูลที่ดึงมา
     setData(res);
   };
 
@@ -67,7 +67,8 @@ export default function SiteDayOffPage() {
       workDate: values.workDate,
       numberOfPeople: Number(values.numberOfPeople),
       penaltyRate: Number(values.penaltyRate),
-      workingPeople: Number(values.workingPeople),
+      workingPeople:
+        values.workingPeople !== null ? Number(values.workingPeople) : 0, // จัดการค่า null
     };
 
     if (editingRecord) {
@@ -111,9 +112,13 @@ export default function SiteDayOffPage() {
           { title: "Site Code", dataIndex: "siteCode" },
           { title: "Site Name", dataIndex: "siteName" },
           { title: "Type Site", dataIndex: "typeSite" },
-          { title: "จำนวนพนักงานตามสัญญา", dataIndex: "numberOfPeople" },
           { title: "ค่าปรับ", dataIndex: "penaltyRate" },
-          { title: "พนักงานประจำตามแผนส่งคนรายวัน", dataIndex: "workingPeople" },
+          { title: "จำนวนพนักงานตามสัญญา", dataIndex: "numberOfPeople" },
+          {
+            title: "พนักงานประจำตามแผนส่งคนรายวัน",
+            dataIndex: "workingPeople",
+          },
+          { title: "ค่าปรับ", dataIndex: "penaltyRate" },
           {
             title: "Action",
             render: (_, record: SiteDayOff) => (
@@ -214,8 +219,8 @@ export default function SiteDayOffPage() {
           </Form.Item>
 
           <Form.Item
-            label="พนักงานประจำตามแผนส่งคนรายวัน"
             name="workingPeople"
+            label="พนักงานประจำตามแผนส่งคนรายวัน"
             rules={[{ required: true }]}
           >
             <InputNumber className="w-full" min={0} />

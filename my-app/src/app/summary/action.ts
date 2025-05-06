@@ -1,6 +1,41 @@
 import { prisma } from "@/lib/prisma"; // ปรับ path ให้ตรงกับโปรเจกต์คุณ
 
-export async function updateTimesheet(id: number, data: any) {
+// สร้าง type สำหรับ TimesheetRecord และ UpdateTimesheetData
+interface TimesheetRecord {
+  id: number;
+  date: Date; 
+  siteCode: string;
+  siteName: string;
+  numberOfPeople: number;
+  dailyWorkingEmployees: number;
+  workingPeople: number;
+  businessLeave: number;
+  sickLeave: number;
+  peopleLeave: number;
+  overContractEmployee: number;
+  replacementEmployee: number;
+  replacementNames: string[];
+  remark: string;
+}
+
+interface UpdateTimesheetData {
+  date: Date;
+  siteCode: string;
+  siteName: string;
+  numberOfPeople: number;
+  dailyWorkingEmployees: number;
+  workingPeople: number;
+  businessLeave: number;
+  sickLeave: number;
+  peopleLeave: number;
+  overContractEmployee: number;
+  replacementEmployee: number;
+  replacementNames: string[];
+  remark: string;
+}
+
+// ฟังก์ชันอัปเดต timesheet
+export async function updateTimesheet(id: number, data: UpdateTimesheetData) {
   try {
     const updated = await prisma.lMTimesheetRecords.update({
       where: { id },
@@ -13,7 +48,8 @@ export async function updateTimesheet(id: number, data: any) {
   }
 }
 
-export async function getTimesheetById(id: number) {
+// ฟังก์ชันดึงข้อมูล timesheet โดยใช้ id
+export async function getTimesheetById(id: number): Promise<TimesheetRecord | null> {
   try {
     const data = await prisma.lMTimesheetRecords.findUnique({
       where: { id },

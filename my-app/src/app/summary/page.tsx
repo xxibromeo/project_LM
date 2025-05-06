@@ -1,14 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, Button } from "antd";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
 import dayjs from "dayjs";
-import "dayjs/locale/th";
 import { signOut } from "next-auth/react";
 
-export default function SummaryPage() {
+// แก้ไขส่วนของการใช้ useSearchParams()
+const SummaryContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dataString = searchParams.get("data");
@@ -16,7 +16,7 @@ export default function SummaryPage() {
   if (!dataString) return <p className="text-center">ไม่พบข้อมูล</p>;
 
   const parsedData = JSON.parse(decodeURIComponent(dataString));
-  console.log('parsedData', parsedData)
+  console.log('parsedData', parsedData);
 
   const formatThaiDate = (dateStr: string) => {
     return dayjs(dateStr).locale("th").format("D MMM YYYY");
@@ -27,9 +27,7 @@ export default function SummaryPage() {
       <Card className="w-full max-w-4xl p-10">
         <div className="flex flex-col items-center">
           <Image src="/logo-SO.webp" alt="Logo" width={80} height={80} />
-          <h1 className="text-lg text-red-600 font-bold my-2">
-            สรุปข้อมูลที่บันทึกแล้ว
-          </h1>
+          <h1 className="text-lg text-red-600 font-bold my-2">สรุปข้อมูลที่บันทึกแล้ว</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2 mt-6">
@@ -111,5 +109,13 @@ export default function SummaryPage() {
         </div>
       </Card>
     </div>
+  );
+};
+
+export default function SummaryPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SummaryContent />
+    </Suspense>
   );
 }
