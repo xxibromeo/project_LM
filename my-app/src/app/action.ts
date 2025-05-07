@@ -19,7 +19,7 @@ export type TFormValue = {
   replacementEmployee: number;
   replacementNames: string[];
   remark: string;
-  nameadmin: string;
+  nameadmin: string | null;
 };
 export type ISite = Site & { siteDayOffRecords: SiteDayOff[] | null };
 

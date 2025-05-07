@@ -25,8 +25,8 @@ type Site = {
   siteName: string;
   subSite: string;
   clientName: string | null;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date|null;
+  endDate: Date|null;
   numberOfPeople: number | null;
   penaltyRate: number | null;
   typeSite: string | null;

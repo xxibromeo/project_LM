@@ -38,21 +38,21 @@ model LMTimesheetRecords {
 }
 
 model Site {
-  id                 Int      @id @default(autoincrement())
-  subSite            String   @unique
+  id                 Int       @id @default(autoincrement())
+  subSite            String    @unique
   siteCode           String
   siteName           String
   clientName         String
-  startDate          DateTime @default(now())
-  endDate            DateTime @default(now())
+  startDate          DateTime?
+  endDate            DateTime?
   numberOfPeople     Int
   penaltyRate        Int
   typeSite           String
   adminWage          String
   siteSupervisorName String
   status             String
-  createdAt          DateTime @default(now())
-  updateAt           DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updateAt           DateTime  @updatedAt
 
   // ความสัมพันธ์
   timesheets        LMTimesheetRecords[] @relation("TimesheetToSite")
@@ -61,7 +61,7 @@ model Site {
 
 model SiteDayOff {
   id             Int      @id @default(autoincrement())
-  workDate       DateTime @default(now())
+  workDate       DateTime
   subSite        String
   siteCode       String
   siteName       String
