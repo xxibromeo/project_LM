@@ -22,7 +22,12 @@ export default function TimesheetPage() {
 
   const fetchData = async () => {
     const res = await getAllTimesheets();
-    setTimesheets(res);
+
+    const sorted = res.sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime(); // เรียงตาม datetime จากมากไปน้อย
+    });
+
+    setTimesheets(sorted);
   };
 
   useEffect(() => {
@@ -32,7 +37,7 @@ export default function TimesheetPage() {
   // ✅ ตั้งค่าฟอร์มเมื่อ editingData และ session พร้อมแล้ว
   useEffect(() => {
     if (!editingData || !session?.user?.name) return;
-  
+
     form.setFieldsValue({
       ...editingData,
       date: dayjs(editingData.date),
@@ -40,8 +45,6 @@ export default function TimesheetPage() {
     });
     setReplacementCount(editingData.replacementEmployee || 0);
   }, [editingData, form, session?.user?.name]);
-  
-
 
   const onFinish = async (values: ILMTimesheetRecords) => {
     if (editingData) {
@@ -81,7 +84,10 @@ export default function TimesheetPage() {
           {
             title: "วันที่",
             dataIndex: "date",
-            render: (d) => dayjs(d).format("YYYY-MM-DD"),
+            sorter: (a, b) =>
+              new Date(a.date).getTime() - new Date(b.date).getTime(),
+            defaultSortOrder: "descend",
+            render: (d) => dayjs(d).format("YYYY-MM-DD HH:mm"),
           },
           { title: "รหัสไซต์", dataIndex: "siteCode" },
           { title: "ชื่อไซต์", dataIndex: "siteName" },
@@ -148,10 +154,7 @@ export default function TimesheetPage() {
           <Form.Item label="จำนวนพนักงานตามสัญญา" name="numberOfPeople">
             <Input disabled type="number" />
           </Form.Item>
-          <Form.Item
-            label="พนักงานประจำตามแผนส่งคนรายวัน"
-            name="workingPeople"
-          >
+          <Form.Item label="พนักงานประจำตามแผนส่งคนรายวัน" name="workingPeople">
             <Input disabled type="number" />
           </Form.Item>
           <Form.Item
@@ -169,10 +172,7 @@ export default function TimesheetPage() {
           <Form.Item label="ขาดงาน (พนักงานประจำ)" name="peopleLeave">
             <Input type="number" />
           </Form.Item>
-          <Form.Item
-            label="พนักงานเกินสัญญา"
-            name="overContractEmployee"
-          >
+          <Form.Item label="พนักงานเกินสัญญา" name="overContractEmployee">
             <Input type="number" />
           </Form.Item>
 
@@ -182,8 +182,7 @@ export default function TimesheetPage() {
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
                 if (!isNaN(value)) {
-                  const current =
-                    form.getFieldValue("replacementNames") || [];
+                  const current = form.getFieldValue("replacementNames") || [];
                   const added = Array.from(
                     { length: value - current.length },
                     () => ""

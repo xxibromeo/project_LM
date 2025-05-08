@@ -70,8 +70,8 @@ export default function RegisterForm() {
         dayjs(siteDayoff.workDate).isSame(selectedDate, "day")
       );
 
-    const dataToSend = {
-      date: values.date,
+    const dataToSend: TFormValue = {
+      date: selectedDate,
       subSite: selectedSite?.subSite ?? "",
       siteCode: selectedSite?.siteCode ?? "",
       siteName: selectedSite?.siteName ?? "",
@@ -92,15 +92,11 @@ export default function RegisterForm() {
 
     if (save) {
       form.resetFields();
-      router.push(
-        `/summary?data=${encodeURIComponent(JSON.stringify(save))}`
-      );
+      router.push(`/summary?data=${encodeURIComponent(JSON.stringify(save))}`);
     }
   };
 
-  // ปิดการแก้ไข DatePicker (disabled)
   const disabledDatePicker: DatePickerProps["disabledDate"] = () => true;
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-lg p-10">
