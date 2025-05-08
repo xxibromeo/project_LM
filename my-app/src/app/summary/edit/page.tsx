@@ -1,24 +1,81 @@
-"use client"; // เพิ่มบรรทัดนี้ที่ด้านบนของไฟล์
-import React, { Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Card, Button } from "antd";
+"use client";
+
+import React, { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Card, Button, Input, message } from "antd";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
+import { updateTimesheet, TimesheetData } from "./action";
+import { formatThaiDate } from "@/utils/format";
 
-// สร้างคอมโพเนนต์ที่ใช้ useSearchParams() ที่จะต้องห่อใน Suspense
+dayjs.locale("th");
+
 const EditSummaryPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dataString = searchParams.get("data");
 
-  if (!dataString) return <p className="text-center">ไม่พบข้อมูล</p>;
+  const [form, setForm] = useState<TimesheetData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [initialReplacementCount, setInitialReplacementCount] = useState(0);
 
-  const parsedData = JSON.parse(decodeURIComponent(dataString));
+  useEffect(() => {
+    if (dataString) {
+      const parsed = JSON.parse(decodeURIComponent(dataString));
+      setForm({
+        ...parsed,
+        date: dayjs(parsed.date).format("YYYY-MM-DD"),
+        replacementNames: parsed.replacementNames || [],
+      });
+      setInitialReplacementCount(parsed.replacementNames?.length || 0);
+    }
+  }, [dataString]);
 
-  const formatThaiDate = (dateStr: string) => {
-    return dayjs(dateStr).locale("th").format("D MMM YYYY");
+  if (!form) return <p className="text-center">ไม่พบข้อมูล</p>;
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const updated = await updateTimesheet(form.id, {
+        ...form,
+        date: new Date(form.date),
+        replacementEmployee: form.replacementNames.length,
+      });
+      message.success("บันทึกข้อมูลเรียบร้อยแล้ว");
+      router.push(`/summary?data=${encodeURIComponent(JSON.stringify(updated))}`);
+    } catch (error: unknown) {
+      console.error(error);
+      message.error("เกิดข้อผิดพลาดขณะบันทึกข้อมูล");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddReplacement = () => {
+    const newList = [...form.replacementNames, ""];
+    setForm({
+      ...form,
+      replacementNames: newList,
+      replacementEmployee: newList.length,
+    });
+  };
+
+  const handleRemoveReplacement = (index: number) => {
+    if (index < initialReplacementCount) return;
+    const updated = [...form.replacementNames];
+    updated.splice(index, 1);
+    setForm({
+      ...form,
+      replacementNames: updated,
+      replacementEmployee: updated.length,
+    });
+  };
+
+  const handleUpdateReplacement = (index: number, value: string) => {
+    const updated = [...form.replacementNames];
+    updated[index] = value;
+    setForm({ ...form, replacementNames: updated });
   };
 
   return (
@@ -26,85 +83,92 @@ const EditSummaryPageContent = () => {
       <Card className="w-full max-w-4xl p-10">
         <div className="flex flex-col items-center">
           <Image src="/logo-SO.webp" alt="Logo" width={80} height={80} />
-          <h1 className="text-lg text-red-600 font-bold my-2">
-            แก้ไขข้อมูลทั้งหมด
-          </h1>
+          <h1 className="text-lg text-red-600 font-bold my-2">แก้ไขข้อมูลทั้งหมด</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2 mt-6">
-          {/* แสดงข้อมูล */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4 mt-6">
           <div className="space-y-2">
-            <p className="text-red-600 font-bold">วันที่</p>
-            <p>{formatThaiDate(parsedData.date)}</p>
+            <label className="text-red-600 font-bold">วันที่</label>
+            <Input disabled type="text" value={formatThaiDate(form.date)} />
 
-            <p className="text-red-600 font-bold">Site Code</p>
-            <p>{parsedData.siteCode || 0}</p>
+            <label className="text-red-600 font-bold">Site Code</label>
+            <Input disabled value={form.siteCode} />
 
-            <p className="text-red-600 font-bold">พนักงานตามสัญญา</p>
-            <p>{parsedData.numberOfPeople || 0}</p>
+            <label className="text-red-600 font-bold">Site Name</label>
+            <Input disabled value={form.siteName} />
 
-            <p className="text-red-600 font-bold">พนักงานประจำ(ที่มาทำงาน)</p>
-            <p>{parsedData.dailyWorkingEmployees || 0}</p>
+            <label className="text-red-600 font-bold">พนักงานตามสัญญา</label>
+            <Input disabled type="number" value={form.numberOfPeople} />
 
-            <p className="text-red-600 font-bold">ชื่อไซต์</p>
-            <p>{parsedData.siteName || 0}</p>
+            <label className="text-red-600 font-bold">พนักงานตามแผน</label>
+            <Input disabled type="number" value={form.workingPeople} />
 
-            <p className="text-red-600 font-bold">พนักงานประจำตามแผนส่งคนรายวัน</p>
-            <p>{parsedData.workingPeople || 0}</p>
+            <label className="text-red-600 font-bold">พนักงานประจำ(ที่มาทำงาน)</label>
+            <Input
+              type="number"
+              value={form.dailyWorkingEmployees}
+              onChange={(e) => setForm({ ...form, dailyWorkingEmployees: Number(e.target.value) })}
+            />
 
-            <p className="text-red-600 font-bold">ลากิจ (พนักงานประจำ)</p>
-            <p>{parsedData.businessLeave || 0}</p>
-
-            <p className="text-red-600 font-bold">ขาดงาน (พนักงานประจำ)</p>
-            <p>{parsedData.peopleLeave || 0}</p>
+            <label className="text-red-600 font-bold">ลากิจ</label>
+            <Input
+              type="number"
+              value={form.businessLeave}
+              onChange={(e) => setForm({ ...form, businessLeave: Number(e.target.value) })}
+            />
           </div>
 
           <div className="space-y-2">
-            <p className="text-red-600 font-bold">จำนวนคนแทนงาน</p>
-            <p>{parsedData.replacementEmployee || 0}</p>
+            <label className="text-red-600 font-bold">ลาป่วย</label>
+            <Input
+              type="number"
+              value={form.sickLeave}
+              onChange={(e) => setForm({ ...form, sickLeave: Number(e.target.value) })}
+            />
 
-            <p className="text-red-600 font-bold">ลาป่วย (พนักงานประจำ)</p>
-            <p>{parsedData.sickLeave || 0}</p>
+            <label className="text-red-600 font-bold">ขาดงาน</label>
+            <Input
+              type="number"
+              value={form.peopleLeave}
+              onChange={(e) => setForm({ ...form, peopleLeave: Number(e.target.value) })}
+            />
 
-            <p className="text-red-600 font-bold">พนักงานเกินสัญญา</p>
-            <p>{parsedData.overContractEmployee || 0}</p>
+            <label className="text-red-600 font-bold">เกินสัญญา</label>
+            <Input
+              type="number"
+              value={form.overContractEmployee}
+              onChange={(e) => setForm({ ...form, overContractEmployee: Number(e.target.value) })}
+            />
 
-            <p className="text-red-600 font-bold">ชื่อคนแทนงาน</p>
-            {(parsedData.replacementNames || []).length > 0 ? (
-              parsedData.replacementNames.map((name: string, idx: number) => (
-                <p key={idx}>{name.trim() || "-"}</p>
-              ))
-            ) : (
-              <p>-</p>
-            )}
+            <label className="text-red-600 font-bold">จำนวนคนแทน</label>
+            <Input disabled type="number" value={form.replacementNames.length} />
 
-            <p className="text-red-600 font-bold">หมายเหตุ</p>
-            <p>{parsedData.remark || "0"}</p>
+            <label className="text-red-600 font-bold">รายชื่อคนแทนงาน</label>
+            {form.replacementNames.map((name, idx) => (
+              <div key={idx} className="flex gap-2 items-center">
+                <Input
+                  value={name}
+                  onChange={(e) => handleUpdateReplacement(idx, e.target.value)}
+                  className="flex-1"
+                />
+                {idx >= initialReplacementCount && (
+                  <Button danger onClick={() => handleRemoveReplacement(idx)}>ลบ</Button>
+                )}
+              </div>
+            ))}
+            <Button onClick={handleAddReplacement}>+ เพิ่มรายชื่อคนแทน</Button>
+
+            <label className="text-red-600 font-bold">หมายเหตุ</label>
+            <Input
+              value={form.remark}
+              onChange={(e) => setForm({ ...form, remark: e.target.value })}
+            />
           </div>
         </div>
 
-        <div className="flex justify-center gap-4 mt-10">
-          <Button
-            type="default"
-            onClick={() =>
-              router.push(
-                `/summary/edit?data=${encodeURIComponent(
-                  JSON.stringify(parsedData)
-                )}`
-              )
-            }
-          >
-            แก้ไขข้อมูล
-          </Button>
-
-          <Button
-            type="primary"
-            className="bg-blue-500"
-            onClick={async () => {
-              await signOut({ callbackUrl: "/" });
-            }}
-          >
-            ยืนยัน
+        <div className="flex justify-center mt-10">
+          <Button type="primary" className="bg-blue-500" loading={loading} onClick={handleSubmit}>
+            บันทึกข้อมูล
           </Button>
         </div>
       </Card>

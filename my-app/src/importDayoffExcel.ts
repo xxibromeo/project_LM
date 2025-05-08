@@ -11,6 +11,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const prisma = new PrismaClient();
 
+interface ExcelDayoffRow {
+  id: number | string;
+  subSite: string;
+  siteCode: string;
+  siteName: string;
+  typeSite: string;
+  numberOfPeople?: number | string;
+  penaltyRate?: number | string;
+  workingPeople?: number | string;
+  workDate: number | string | Date;
+}
+
 function parseExcelDate(value: unknown): Date | null {
   if (!value) return null;
   if (typeof value === "number") {
@@ -44,7 +56,7 @@ async function importExcel() {
   const filePath = path.join(__dirname, "../public/final_dayoff.xlsx");
   const workbook = XLSX.readFile(filePath);
   const sheet = workbook.Sheets["dim_dayoff"];
-  const data: any[] = XLSX.utils.sheet_to_json(sheet);
+  const data = XLSX.utils.sheet_to_json<ExcelDayoffRow>(sheet);
   const chunks = chunkArray(data, 1000);
   let totalImported = 0;
 
@@ -52,7 +64,7 @@ async function importExcel() {
     console.log(`📦 กำลังนำเข้าชุดที่ ${i + 1}/${chunks.length} (${chunk.length} แถว)`);
     for (const row of chunk) {
       const workDate = parseExcelDate(row.workDate);
-      const subSite = row.subSite?.toString().trim() as string;
+      const subSite = row.subSite?.toString().trim();
 
       if (!subSite || !row.siteCode || !row.siteName || !row.typeSite || !workDate) {
         console.warn(`⚠️ ข้ามแถว ID=${row.id} (ข้อมูลไม่ครบหรือวันผิด)`);
@@ -69,20 +81,21 @@ async function importExcel() {
         const c = await prisma.siteDayOff.create({
           data: {
             id: Number(row.id),
-            subSite: subSite,
+            subSite,
             siteCode: row.siteCode,
             siteName: row.siteName,
             typeSite: row.typeSite,
-            numberOfPeople: row.numberOfPeople ? parseInt(row.numberOfPeople) : 0,
-            penaltyRate: row.penaltyRate ? parseFloat(row.penaltyRate) : 0,
-            workingPeople: row.workingPeople ? parseInt(row.workingPeople) : 0,
+            numberOfPeople: row.numberOfPeople ? parseInt(row.numberOfPeople as string) : 0,
+            penaltyRate: row.penaltyRate ? parseFloat(row.penaltyRate as string) : 0,
+            workingPeople: row.workingPeople ? parseInt(row.workingPeople as string) : 0,
             workDate,
           },
         });
         totalImported++;
         console.log("นำเข้าข้อมูล : ", c.id, " subSite: ", c.subSite);
-      } catch (error: any) {
-        console.error(`❌ Error at ID=${row.id}:`, error.message);
+      } catch (error) {
+        const err = error as Error;
+        console.error(`❌ Error at ID=${row.id}:`, err.message);
       }
     }
   }

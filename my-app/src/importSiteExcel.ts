@@ -9,6 +9,21 @@ const prisma = new PrismaClient();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+interface SiteRow {
+  subSite: string;
+  siteCode: string;
+  siteName?: string;
+  clientName?: string;
+  startDate?: string | number | Date;
+  endDate?: string | number | Date;
+  numberOfPeople?: string | number;
+  penaltyRate?: string | number;
+  typeSite?: string;
+  adminWage?: string;
+  siteSupervisorName?: string;
+  status?: string;
+}
+
 // ฟังก์ชันแปลงวันที่จาก Excel
 function parseExcelDate(value: unknown): Date | null {
   if (!value) return null;
@@ -46,7 +61,7 @@ async function importSiteExcel() {
     return;
   }
 
-  const data: any[] = XLSX.utils.sheet_to_json(worksheet);
+  const data: SiteRow[] = XLSX.utils.sheet_to_json<SiteRow>(worksheet);
   let imported = 0;
 
   for (const row of data) {
@@ -64,8 +79,8 @@ async function importSiteExcel() {
           clientName: row.clientName || '',
           startDate: parseExcelDate(row.startDate) || undefined,
           endDate: parseExcelDate(row.endDate) || undefined,
-          numberOfPeople: parseInt(row.numberOfPeople) || 0,
-          penaltyRate: parseFloat(row.penaltyRate) || 0,
+          numberOfPeople: row.numberOfPeople ? parseInt(row.numberOfPeople.toString()) : 0,
+          penaltyRate: row.penaltyRate ? parseFloat(row.penaltyRate.toString()) : 0,
           typeSite: row.typeSite || '',
           adminWage: row.adminWage || '',
           siteSupervisorName: row.siteSupervisorName || '',
@@ -75,8 +90,9 @@ async function importSiteExcel() {
 
       console.log(`✔️ Imported subSite=${row.subSite}`);
       imported++;
-    } catch (error: any) {
-      console.error(`❌ Error on subSite=${row.subSite}:`, error.message);
+    } catch (error) {
+      const err = error as Error;
+      console.error(`❌ Error on subSite=${row.subSite}:`, err.message);
     }
   }
 

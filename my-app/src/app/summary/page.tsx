@@ -6,6 +6,7 @@ import { Card, Button } from "antd";
 import Image from "next/image";
 import dayjs from "dayjs";
 import { signOut } from "next-auth/react";
+import { formatThaiDate } from "@/utils/format";
 
 // แก้ไขส่วนของการใช้ useSearchParams()
 const SummaryContent = () => {
@@ -16,18 +17,17 @@ const SummaryContent = () => {
   if (!dataString) return <p className="text-center">ไม่พบข้อมูล</p>;
 
   const parsedData = JSON.parse(decodeURIComponent(dataString));
-  console.log('parsedData', parsedData);
-
-  const formatThaiDate = (dateStr: string) => {
-    return dayjs(dateStr).locale("th").format("D MMM YYYY");
-  };
+  console.log("parsedData", parsedData);
+  console.log(dayjs("2025-05-08").format("D MMM YYYY"));
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <Card className="w-full max-w-4xl p-10">
         <div className="flex flex-col items-center">
           <Image src="/logo-SO.webp" alt="Logo" width={80} height={80} />
-          <h1 className="text-lg text-red-600 font-bold my-2">สรุปข้อมูลที่บันทึกแล้ว</h1>
+          <h1 className="text-lg text-red-600 font-bold my-2">
+            สรุปข้อมูลที่บันทึกแล้ว
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2 mt-6">
@@ -60,16 +60,16 @@ const SummaryContent = () => {
           </div>
 
           <div className="space-y-2">
-            <p className="text-red-600 font-bold">จำนวนคนแทนงาน</p>
-            <p>{parsedData.replacementEmployee || 0}</p>
-
             <p className="text-red-600 font-bold">ลาป่วย (พนักงานประจำ)</p>
             <p>{parsedData.sickLeave || 0}</p>
 
             <p className="text-red-600 font-bold">พนักงานเกินสัญญา</p>
             <p>{parsedData.overContractEmployee || 0}</p>
 
-            <p className="text-red-600 font-bold">ชื่อคนแทนงาน</p>
+            <p className="text-red-600 font-bold">จำนวนคนแทนงาน</p>
+            <p>{parsedData.replacementEmployee || 0}</p>
+
+            <p className="text-red-600 font-bold">รายชื่อคนแทนงาน</p>
             {(parsedData.replacementNames || []).length > 0 ? (
               parsedData.replacementNames.map((name: string, idx: number) => (
                 <p key={idx}>{name.trim() || "-"}</p>
@@ -79,20 +79,24 @@ const SummaryContent = () => {
             )}
 
             <p className="text-red-600 font-bold">หมายเหตุ</p>
-            <p>{parsedData.remark || "0"}</p>
+            <p>{parsedData.remark || " "}</p>
           </div>
         </div>
 
         <div className="flex justify-center gap-4 mt-10">
           <Button
             type="default"
-            onClick={() =>
-              router.push(
+            onClick={() => {
+              const sanitizedData = {
+                ...parsedData,
+                date: dayjs(parsedData.date).format("YYYY-MM-DD"),
+              };
+              router.replace(
                 `/summary/edit?data=${encodeURIComponent(
-                  JSON.stringify(parsedData)
+                  JSON.stringify(sanitizedData)
                 )}`
-              )
-            }
+              );
+            }}
           >
             แก้ไขข้อมูล
           </Button>
