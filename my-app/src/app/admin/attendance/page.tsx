@@ -147,7 +147,7 @@ export default function TimesheetPage() {
           },
           { title: "ลากิจ", dataIndex: "businessLeave" },
           { title: "ลาป่วย", dataIndex: "sickLeave" },
-          { title: "ลาอื่นๆ", dataIndex: "peopleLeave" },
+          { title: "ขาดงาน (พนักงานประจำ)", dataIndex: "peopleLeave" },
           { title: "พนักงานเกินสัญญา", dataIndex: "overContractEmployee" },
           { title: "แทนงาน", dataIndex: "replacementEmployee" },
           {
