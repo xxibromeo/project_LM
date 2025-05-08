@@ -41,7 +41,7 @@ async function importExcel() {
   await prisma.siteDayOff.deleteMany({});
   console.log("✅ ลบข้อมูลเดิมเรียบร้อย\n");
 
-  const filePath = path.join(__dirname, "../public/data_dictionary_LMdayoff.xlsx");
+  const filePath = path.join(__dirname, "../public/final_dayoff.xlsx");
   const workbook = XLSX.readFile(filePath);
   const sheet = workbook.Sheets["dim_dayoff"];
   const data: any[] = XLSX.utils.sheet_to_json(sheet);
