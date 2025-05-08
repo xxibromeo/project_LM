@@ -9,6 +9,10 @@ import {
   updateTimesheet,
   ILMTimesheetRecords,
 } from "@/app/admin/attendance/action";
+import "dayjs/locale/th";
+import { saveAs } from "file-saver";
+dayjs.locale("th");
+import * as XLSX from "xlsx";
 
 export default function TimesheetPage() {
   const [timesheets, setTimesheets] = useState<ILMTimesheetRecords[]>([]);
@@ -19,6 +23,39 @@ export default function TimesheetPage() {
   const [replacementCount, setReplacementCount] = useState(0);
   const [form] = Form.useForm();
   const { data: session } = useSession(); // ✅ เปลี่ยนชื่อเป็น session เพื่อไม่ชนกับ data
+
+  const exportToExcel = () => {
+    const cleanedData = timesheets.map((item, index) => ({
+      ลำดับ: index + 1,
+      วันที่: dayjs(item.date).format("D MMMM YYYY เวลา HH:mm"),
+      รหัสไซต์: item.siteCode,
+      ชื่อไซต์: item.siteName,
+      พนักงานตามสัญญา: item.numberOfPeople,
+      พนักงานตามแผน: item.workingPeople,
+      มาทำงานจริง: item.dailyWorkingEmployees,
+      ลากิจ: item.businessLeave,
+      ลาป่วย: item.sickLeave,
+      ขาดงาน: item.peopleLeave,
+      เกินสัญญา: item.overContractEmployee,
+      จำนวนคนแทน: item.replacementEmployee,
+      รายชื่อคนแทน: (item.replacementNames || []).join(", "),
+      หมายเหตุ: item.remark,
+      ผู้บันทึก: item.nameadmin || "-",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(cleanedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Timesheet");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `รายงาน-timesheet_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+  };
 
   const fetchData = async () => {
     const res = await getAllTimesheets();
@@ -71,10 +108,18 @@ export default function TimesheetPage() {
       setEditingData(null);
     }
   };
+  
 
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">จัดการข้อมูล Timesheet</h1>
+      <Button
+        type="primary"
+        className="mb-4 bg-green-600 text-white"
+        onClick={exportToExcel}
+      >
+        📥 ดาวน์โหลด Excel
+      </Button>
 
       <Table
         dataSource={timesheets}
