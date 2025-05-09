@@ -23,12 +23,22 @@ const EditSummaryPageContent = () => {
   useEffect(() => {
     if (dataString) {
       const parsed = JSON.parse(decodeURIComponent(dataString));
+
+      // ตรวจสอบอย่างเข้มว่าเป็น array และไม่ใช่ [""]
+      const isValidReplacement =
+        Array.isArray(parsed.replacementNames) &&
+        parsed.replacementNames.length > 0 &&
+        parsed.replacementNames.some((name: string) => name.trim() !== "");
+
+      const replacements = isValidReplacement ? parsed.replacementNames : [];
+
       setForm({
         ...parsed,
         date: dayjs(parsed.date).format("YYYY-MM-DD"),
-        replacementNames: parsed.replacementNames || [],
+        replacementNames: replacements,
       });
-      setInitialReplacementCount(parsed.replacementNames?.length || 0);
+
+      setInitialReplacementCount(replacements.length);
     }
   }, [dataString]);
 
@@ -43,7 +53,9 @@ const EditSummaryPageContent = () => {
         replacementEmployee: form.replacementNames.length,
       });
       message.success("บันทึกข้อมูลเรียบร้อยแล้ว");
-      router.push(`/summary?data=${encodeURIComponent(JSON.stringify(updated))}`);
+      router.push(
+        `/summary?data=${encodeURIComponent(JSON.stringify(updated))}`
+      );
     } catch (error: unknown) {
       console.error(error);
       message.error("เกิดข้อผิดพลาดขณะบันทึกข้อมูล");
@@ -83,7 +95,9 @@ const EditSummaryPageContent = () => {
       <Card className="w-full max-w-4xl p-10">
         <div className="flex flex-col items-center">
           <Image src="/logo-SO.webp" alt="Logo" width={80} height={80} />
-          <h1 className="text-lg text-red-600 font-bold my-2">แก้ไขข้อมูลทั้งหมด</h1>
+          <h1 className="text-lg text-red-600 font-bold my-2">
+            แก้ไขข้อมูลทั้งหมด
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4 mt-6">
@@ -103,18 +117,27 @@ const EditSummaryPageContent = () => {
             <label className="text-red-600 font-bold">พนักงานตามแผน</label>
             <Input disabled type="number" value={form.workingPeople} />
 
-            <label className="text-red-600 font-bold">พนักงานประจำ(ที่มาทำงาน)</label>
+            <label className="text-red-600 font-bold">
+              พนักงานประจำ(ที่มาทำงาน)
+            </label>
             <Input
               type="number"
               value={form.dailyWorkingEmployees}
-              onChange={(e) => setForm({ ...form, dailyWorkingEmployees: Number(e.target.value) })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  dailyWorkingEmployees: Number(e.target.value),
+                })
+              }
             />
 
             <label className="text-red-600 font-bold">ลากิจ</label>
             <Input
               type="number"
               value={form.businessLeave}
-              onChange={(e) => setForm({ ...form, businessLeave: Number(e.target.value) })}
+              onChange={(e) =>
+                setForm({ ...form, businessLeave: Number(e.target.value) })
+              }
             />
           </div>
 
@@ -123,25 +146,38 @@ const EditSummaryPageContent = () => {
             <Input
               type="number"
               value={form.sickLeave}
-              onChange={(e) => setForm({ ...form, sickLeave: Number(e.target.value) })}
+              onChange={(e) =>
+                setForm({ ...form, sickLeave: Number(e.target.value) })
+              }
             />
 
             <label className="text-red-600 font-bold">ขาดงาน</label>
             <Input
               type="number"
               value={form.peopleLeave}
-              onChange={(e) => setForm({ ...form, peopleLeave: Number(e.target.value) })}
+              onChange={(e) =>
+                setForm({ ...form, peopleLeave: Number(e.target.value) })
+              }
             />
 
             <label className="text-red-600 font-bold">เกินสัญญา</label>
             <Input
               type="number"
               value={form.overContractEmployee}
-              onChange={(e) => setForm({ ...form, overContractEmployee: Number(e.target.value) })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  overContractEmployee: Number(e.target.value),
+                })
+              }
             />
 
             <label className="text-red-600 font-bold">จำนวนคนแทน</label>
-            <Input disabled type="number" value={form.replacementNames.length} />
+            <Input
+              disabled
+              type="number"
+              value={form.replacementNames.length}
+            />
 
             <label className="text-red-600 font-bold">รายชื่อคนแทนงาน</label>
             {form.replacementNames.map((name, idx) => (
@@ -152,12 +188,15 @@ const EditSummaryPageContent = () => {
                   className="flex-1"
                 />
                 {idx >= initialReplacementCount && (
-                  <Button danger onClick={() => handleRemoveReplacement(idx)}>ลบ</Button>
+                  <Button danger onClick={() => handleRemoveReplacement(idx)}>
+                    ลบ
+                  </Button>
                 )}
               </div>
             ))}
+            <br />
             <Button onClick={handleAddReplacement}>+ เพิ่มรายชื่อคนแทน</Button>
-
+            <br />
             <label className="text-red-600 font-bold">หมายเหตุ</label>
             <Input
               value={form.remark}
@@ -167,7 +206,12 @@ const EditSummaryPageContent = () => {
         </div>
 
         <div className="flex justify-center mt-10">
-          <Button type="primary" className="bg-blue-500" loading={loading} onClick={handleSubmit}>
+          <Button
+            type="primary"
+            className="bg-blue-500"
+            loading={loading}
+            onClick={handleSubmit}
+          >
             บันทึกข้อมูล
           </Button>
         </div>
