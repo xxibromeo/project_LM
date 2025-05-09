@@ -63,9 +63,6 @@ export default function SiteManagementPage() {
           : null,
     };
 
-    // ตรวจสอบว่า status ถูกส่งมาด้วย
-    console.log("status:", payload.status); // ตรวจสอบค่า status
-
     if (!editingSite) {
       delete payload.id; // ลบ id ตอนเพิ่ม
     }

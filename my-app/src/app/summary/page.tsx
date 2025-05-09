@@ -17,9 +17,7 @@ const SummaryContent = () => {
   if (!dataString) return <p className="text-center">ไม่พบข้อมูล</p>;
 
   const parsedData = JSON.parse(decodeURIComponent(dataString));
-  console.log("parsedData", parsedData);
-  console.log(dayjs("2025-05-08").format("D MMM YYYY"));
-
+ 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <Card className="w-full max-w-4xl p-10">
