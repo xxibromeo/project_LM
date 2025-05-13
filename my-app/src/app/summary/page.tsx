@@ -17,7 +17,7 @@ const SummaryContent = () => {
   if (!dataString) return <p className="text-center">ไม่พบข้อมูล</p>;
 
   const parsedData = JSON.parse(decodeURIComponent(dataString));
- 
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <Card className="w-full max-w-4xl p-10">
@@ -36,19 +36,19 @@ const SummaryContent = () => {
             <p className="text-red-600 font-bold">Site Code</p>
             <p>{parsedData.siteCode || 0}</p>
 
-            <p className="text-red-600 font-bold">พนักงานตามสัญญา</p>
-            <p>{parsedData.numberOfPeople || 0}</p>
-
-            <p className="text-red-600 font-bold">พนักงานประจำ(ที่มาทำงาน)</p>
-            <p>{parsedData.dailyWorkingEmployees || 0}</p>
-
             <p className="text-red-600 font-bold">ชื่อไซต์</p>
             <p>{parsedData.siteName || 0}</p>
+
+            <p className="text-red-600 font-bold">พนักงานตามสัญญา</p>
+            <p>{parsedData.numberOfPeople || 0}</p>
 
             <p className="text-red-600 font-bold">
               พนักงานประจำตามแผนส่งคนรายวัน
             </p>
             <p>{parsedData.workingPeople || 0}</p>
+
+            <p className="text-red-600 font-bold">พนักงานประจำ(ที่มาทำงาน)</p>
+            <p>{parsedData.dailyWorkingEmployees || 0}</p>
 
             <p className="text-red-600 font-bold">ลากิจ (พนักงานประจำ)</p>
             <p>{parsedData.businessLeave || 0}</p>
