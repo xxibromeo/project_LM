@@ -241,8 +241,8 @@ export default function SiteManagementPage() {
 
           <Form.Item label="สถานะไซต์" name="status">
             <Select placeholder="เลือกสถานะไซต์">
-              <Select.Option value="active ">ยังไม่หมดอายุสัญญา</Select.Option>
-              <Select.Option value="expired">หมดสัญญา</Select.Option>
+              <Select.Option value="active ">active</Select.Option>
+              <Select.Option value="expired">expired</Select.Option>
             </Select>
           </Form.Item>
         </Form>
