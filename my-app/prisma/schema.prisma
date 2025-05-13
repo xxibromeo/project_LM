@@ -46,7 +46,7 @@ model Site {
   startDate          DateTime?
   endDate            DateTime?
   numberOfPeople     Int
-  penaltyRate        Int
+  penaltyRate        Float?
   typeSite           String
   adminWage          String
   siteSupervisorName String
@@ -67,7 +67,7 @@ model SiteDayOff {
   siteName       String
   typeSite       String
   numberOfPeople Int
-  penaltyRate    Int
+  penaltyRate    Float?
   workingPeople  Int?
   createdAt      DateTime @default(now())
   updateAt       DateTime @updatedAt

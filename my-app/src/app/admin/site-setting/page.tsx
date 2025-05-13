@@ -59,7 +59,7 @@ export default function SiteManagementPage() {
       numberOfPeople: parseInt(values.numberOfPeople, 10) || 0,
       penaltyRate:
         values.penaltyRate !== undefined && values.penaltyRate !== ""
-          ? parseInt(values.penaltyRate, 10)
+          ? parseFloat(Number(values.penaltyRate).toFixed(2)) // 👈 ใช้ Number() ก่อน toFixed
           : null,
     };
 
@@ -207,11 +207,7 @@ export default function SiteManagementPage() {
             <DatePicker className="w-full" />
           </Form.Item>
 
-          <Form.Item
-            label="วันที่สิ้นสุดการทำงาน"
-            name="endDate"
-            rules={[{ required: true }]}
-          >
+          <Form.Item label="วันที่สิ้นสุดการทำงาน" name="endDate">
             <DatePicker className="w-full" />
           </Form.Item>
 
@@ -223,7 +219,7 @@ export default function SiteManagementPage() {
             <Input type="number" min={1} className="w-full" />
           </Form.Item>
           <Form.Item label="อัตราค่าปรับ(บาท)" name="penaltyRate">
-            <Input type="number" min={0} className="w-full" />
+            <Input type="number" min={0} step={0.01} className="w-full" />
           </Form.Item>
 
           <Form.Item label="ประเภทการชดเชย" name="typeSite">
