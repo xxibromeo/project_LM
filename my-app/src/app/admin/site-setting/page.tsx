@@ -25,8 +25,8 @@ type Site = {
   siteName: string;
   subSite: string;
   clientName: string | null;
-  startDate: Date|null;
-  endDate: Date|null;
+  startDate: Date | null;
+  endDate: Date | null;
   numberOfPeople: number | null;
   penaltyRate: number | null;
   typeSite: string | null;
@@ -229,9 +229,9 @@ export default function SiteManagementPage() {
           <Form.Item label="ประเภทการชดเชย" name="typeSite">
             <Select placeholder="เลือกประเภทการชดเชย">
               <Select.Option value="ชดเชยรายเดือน ">
-                ชดเชยรายเดือน
+                ชดแรงภายในเดือน
               </Select.Option>
-              <Select.Option value="ชดเชยรายวัน">ชดเชยรายวัน</Select.Option>
+              <Select.Option value="ชดเชยรายวัน">ชดแรงภายในวัน</Select.Option>
             </Select>
           </Form.Item>
 
